@@ -337,11 +337,38 @@
     <button class="preview-remove" id="removeBtn">✕ Ganti</button>
   </div>
 
-  <!-- Format Toggle -->
-  <div class="format-row">
-    <button class="fmt-btn active" data-fmt="json" onclick="setFormat('json', this)">JSON Structured</button>
-    <button class="fmt-btn" data-fmt="plain" onclick="setFormat('plain', this)">Plain Text</button>
-    <button class="fmt-btn" data-fmt="both" onclick="setFormat('both', this)">Keduanya</button>
+  <!-- Output Format -->
+  <div class="option-group">
+    <div class="option-label">Output Format</div>
+    <div class="format-row">
+      <button class="fmt-btn active" onclick="setFormat('json', this)">JSON Structured</button>
+      <button class="fmt-btn" onclick="setFormat('plain', this)">Plain Text</button>
+    </div>
+  </div>
+  
+  <!-- Target AI -->
+  <div class="option-group">
+    <div class="option-label">Target AI</div>
+    <div class="format-row">
+      <button class="fmt-btn active" onclick="setTargetAI('chatgpt', this)">ChatGPT</button>
+      <button class="fmt-btn" onclick="setTargetAI('gemini', this)">Gemini</button>
+      <button class="fmt-btn" onclick="setTargetAI('midjourney', this)">Midjourney</button>
+    </div>
+  </div>
+  
+  <!-- Visual Style -->
+  <div class="option-group">
+    <div class="option-label">Visual Style</div>
+    <div class="format-row">
+      <button class="fmt-btn active" onclick="setVisualStyle('cinematic', this)">Cinematic</button>
+      <button class="fmt-btn" onclick="setVisualStyle('poster_ads', this)">Poster Ads</button>
+      <button class="fmt-btn" onclick="setVisualStyle('anime', this)">Anime</button>
+    </div>
+    <div class="format-row" style="margin-top:10px;">
+      <button class="fmt-btn" onclick="setVisualStyle('realistic', this)">Realistic</button>
+      <button class="fmt-btn" onclick="setVisualStyle('luxury', this)">Luxury</button>
+      <button class="fmt-btn" onclick="setVisualStyle('streetwear', this)">Streetwear</button>
+    </div>
   </div>
 
   <!-- Generate -->
