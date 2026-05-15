@@ -171,6 +171,23 @@
     margin-top: 20px;
   }
 
+  .option-group {
+    margin-top: 20px;
+  }
+
+  .option-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .option-group .format-row {
+    margin-top: 0;
+  }
+
   .fmt-btn {
     flex: 1;
     background: var(--surface);
@@ -389,14 +406,21 @@
     <div class="result-content" id="resultContent"></div>
   </div>
 
-  <footer>RanzAI · powered by Claude Vision · by Iky</footer>
+  <footer>RanzAI · powered by OpenAI Vision · by Iky</footer>
 </div>
 
 <script>
   let imageBase64 = null;
   let imageMime = 'image/jpeg';
+
   let currentFormat = 'json';
+  let currentTargetAI = 'chatgpt';
+  let currentVisualStyle = 'cinematic';
+
   let rawResult = '';
+
+  // GANTI DENGAN PUBLISHABLE KEY SUPABASE TUAN IKY
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_xxxxx';
 
   const fileInput = document.getElementById('fileInput');
   const uploadZone = document.getElementById('uploadZone');
@@ -450,36 +474,109 @@
 
   function setFormat(fmt, el) {
     currentFormat = fmt;
-    document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+    const buttons = el.closest('.option-group').querySelectorAll('.fmt-btn');
+    buttons.forEach(b => b.classList.remove('active'));
     el.classList.add('active');
   }
 
+  function setTargetAI(ai, el) {
+    currentTargetAI = ai;
+    const buttons = el.closest('.option-group').querySelectorAll('.fmt-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function setVisualStyle(style, el) {
+    currentVisualStyle = style;
+    const buttons = el.closest('.option-group').querySelectorAll('.fmt-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function getTargetAIInstruction() {
+    const targetMap = {
+      chatgpt: 'Optimize the final prompt for ChatGPT image generation. Use natural, descriptive language with clear subject, composition, lighting, mood, background, and quality direction. Do not use Midjourney parameters.',
+      gemini: 'Optimize the final prompt for Gemini image generation. Use clean descriptive sentences, clear object relationships, visual hierarchy, and concise artistic direction. Do not use Midjourney parameters.',
+      midjourney: 'Optimize the final prompt for Midjourney. Use compact high-impact visual phrases, strong aesthetic keywords, camera and lighting terms, and add suitable Midjourney parameters such as --ar, --style raw, --stylize, only when useful.'
+    };
+
+    return targetMap[currentTargetAI] || targetMap.chatgpt;
+  }
+
+  function getVisualStyleInstruction() {
+    const styleMap = {
+      cinematic: 'Visual style: cinematic, premium film still, dramatic composition, atmospheric lighting, strong depth, emotional mood, high-end color grading, realistic visual storytelling.',
+      poster_ads: 'Visual style: premium advertising poster, bold composition, strong product/subject focus, clean graphic layout, commercial lighting, editorial polish, high-impact campaign aesthetic.',
+      anime: 'Visual style: high-end anime illustration, expressive but clean character rendering, cinematic anime lighting, detailed background, polished Japanese visual direction, not generic.',
+      realistic: 'Visual style: photorealistic, natural anatomy, believable lighting, real camera feel, sharp detail, realistic textures, professional photography quality.',
+      luxury: 'Visual style: luxury editorial, elegant composition, premium magazine aesthetic, refined lighting, minimal but expensive feel, high-fashion visual language.',
+      streetwear: 'Visual style: urban streetwear, bold youth culture, editorial street photography, graphic attitude, modern outfit detail, raw but polished creative direction.'
+    };
+
+    return styleMap[currentVisualStyle] || styleMap.cinematic;
+  }
+
   function buildPrompt() {
+    const targetAI = getTargetAIInstruction();
+    const visualStyle = getVisualStyleInstruction();
+
     if (currentFormat === 'json') {
-      return `Analyze this image and generate a detailed image generation prompt in JSON format. Return ONLY valid JSON, no explanation, no markdown. Use this structure:
+      return `Analyze the uploaded image and create a premium image-generation prompt system output.
+
+IMPORTANT RULES:
+- Return ONLY valid JSON.
+- No markdown.
+- No explanation.
+- Preserve the key identity and main visual elements from the uploaded image.
+- Improve the image into a stronger generation-ready prompt.
+- Apply the selected target AI and visual style instructions.
+
+TARGET AI INSTRUCTION:
+${targetAI}
+
+VISUAL STYLE INSTRUCTION:
+${visualStyle}
+
+Return this exact JSON structure:
 {
-  "ratio": "16:9 or 9:16 or 1:1 etc",
-  "style": "art style (anime, photorealistic, digital art, etc)",
-  "visual_description": "full scene description",
-  "main_subject": "main subject detail",
-  "supporting_elements": "background, props, environment",
-  "lighting": "lighting description",
-  "color_palette": "dominant colors",
-  "mood": "overall mood/atmosphere",
-  "camera_angle": "angle/perspective",
-  "quality_tags": "4k, highly detailed, etc"
+  "target_ai": "${currentTargetAI}",
+  "visual_style": "${currentVisualStyle}",
+  "ratio": "detected or recommended aspect ratio",
+  "style": "final art/photography style",
+  "visual_description": "complete upgraded scene description",
+  "main_subject": "main subject with important identity, pose, expression, outfit, and details",
+  "supporting_elements": "background, props, environment, symbols, graphic elements",
+  "composition": "framing, camera distance, angle, layout, visual hierarchy",
+  "lighting": "lighting setup, contrast, shadows, highlights, atmosphere",
+  "color_palette": "dominant colors and accent colors",
+  "mood": "overall emotional tone and atmosphere",
+  "camera_angle": "camera angle, lens feel, depth of field",
+  "quality_tags": "generation quality tags suited for the selected target AI",
+  "final_prompt": "copy-ready final prompt optimized for the selected target AI and visual style"
 }`;
-    } else if (currentFormat === 'plain') {
-      return `Analyze this image and generate a detailed Midjourney-style prompt. Output ONLY the prompt text, no explanation. Format: main subject, environment, style, lighting, mood, technical specs. Keep it under 200 words. End with quality tags like --ar 16:9 --q 2 --style raw if applicable.`;
-    } else {
-      return `Analyze this image and generate TWO versions of a prompt:
-
-1. JSON FORMAT - Return structured JSON with fields: ratio, style, visual_description, main_subject, supporting_elements, lighting, color_palette, mood, camera_angle, quality_tags
-
-2. PLAIN TEXT - Midjourney-style prompt, concise, under 150 words
-
-Separate them with "---" between JSON and plain text. Start with the JSON block (no markdown fences).`;
     }
+
+    return `Analyze the uploaded image and generate ONE copy-ready image-generation prompt.
+
+IMPORTANT RULES:
+- Output ONLY the final prompt text.
+- No explanation.
+- No title.
+- Preserve the key identity and main visual elements from the uploaded image.
+- Upgrade the prompt so it feels premium, detailed, and ready to use.
+
+TARGET AI INSTRUCTION:
+${targetAI}
+
+VISUAL STYLE INSTRUCTION:
+${visualStyle}
+
+Final prompt requirements:
+- Describe main subject clearly.
+- Include pose, expression, outfit, background, lighting, mood, composition, camera angle, and quality direction.
+- Make the prompt optimized for ${currentTargetAI}.
+- Make the visual direction strongly follow ${currentVisualStyle}.
+- Keep it powerful but not messy.`;
   }
 
   async function generatePrompt() {
@@ -498,8 +595,8 @@ Separate them with "---" between JSON and plain text. Start with the JSON block 
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': 'https://cavouyzyasnuygkuwizy.supabase.co',
-            'Authorization': 'Bearer sb_publishable_xxxxx'
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_PUBLISHABLE_KEY
           },
           body: JSON.stringify({
             imageBase64,
