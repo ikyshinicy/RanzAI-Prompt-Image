@@ -10,10 +10,17 @@
 <body class="app-page">
 
 <div class="top-controls">
+  <a href="index.html" class="control-btn" title="Home">🏠 Home</a>
   <button class="control-btn" data-lang-btn="id">ID</button>
   <button class="control-btn" data-lang-btn="en">EN</button>
   <button class="control-btn" data-theme-toggle>☾ Dark</button>
-  <a href="topup.html" class="credit-bar" id="creditBar">
+  <!-- Auth buttons: tampil kalau belum login -->
+  <div id="authButtons" style="display:none;">
+    <a href="auth/login.html" class="control-btn">Login</a>
+    <a href="auth/register.html" class="control-btn" style="background:var(--accent);color:#0d0d0f;border-color:var(--accent);font-weight:700;">Daftar</a>
+  </div>
+  <!-- Credit bar: tampil kalau sudah login -->
+  <a href="topup.html" class="credit-bar" id="creditBar" style="display:none;">
     <span class="credit-icon">⚡</span>
     <span class="credit-count" id="creditCount">—</span>
     <span class="credit-label">credits</span>
@@ -26,6 +33,26 @@
     <h1><span data-i18n="app_title">Image →</span> <span data-i18n="app_title_accent">Prompt</span></h1>
     <p class="subtitle" data-i18n="app_subtitle">upload gambar · generate · copy · done</p>
   </header>
+
+  <!-- Banner: belum login -->
+  <div id="bannerNotLogin" style="display:none; margin-bottom:20px; background:rgba(124,92,252,.08); border:1px solid rgba(124,92,252,.3); border-radius:12px; padding:14px 18px; display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; color:#a090f0; line-height:1.6;">
+      🔒 <strong style="color:#c4b8ff;">Login dulu</strong> untuk bisa generate prompt.
+    </div>
+    <div style="display:flex; gap:8px; flex-shrink:0;">
+      <a href="auth/login.html" style="font-family:'Space Mono',monospace; font-size:11px; color:#a090f0; border:1px solid rgba(124,92,252,.4); border-radius:8px; padding:7px 14px; text-decoration:none; transition:all .2s;">Login</a>
+      <a href="auth/register.html" style="font-family:'Space Mono',monospace; font-size:11px; color:#0d0d0f; background:var(--accent); border:1px solid var(--accent); border-radius:8px; padding:7px 14px; text-decoration:none; font-weight:700; transition:all .2s;">Daftar Gratis</a>
+    </div>
+  </div>
+
+  <!-- Banner: kredit habis -->
+  <div id="bannerNoCredit" style="display:none; margin-bottom:20px; background:rgba(255,77,77,.06); border:1px solid rgba(255,77,77,.25); border-radius:12px; padding:14px 18px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; color:#ff8080; line-height:1.6;">
+      ⚡ <strong style="color:#ffaaaa;">Kredit habis!</strong> Top up untuk lanjut generate.
+      <span style="color:#6b6b7a; font-size:10px; display:block; margin-top:2px;">Rp 1.000 = 1 generate</span>
+    </div>
+    <a href="topup.html" style="font-family:'Space Mono',monospace; font-size:11px; color:#0d0d0f; background:var(--accent); border-radius:8px; padding:8px 16px; text-decoration:none; font-weight:700; flex-shrink:0;">⚡ Top Up</a>
+  </div>
 
   <div class="upload-zone" id="uploadZone">
     <input type="file" id="fileInput" accept="image/*">
@@ -128,6 +155,12 @@
 .credit-bar:hover { background: rgba(232,255,71,.15); }
 .credit-bar.low { border-color: rgba(255,77,77,.4); color: #ff8080; background: rgba(255,77,77,.08); }
 .credit-icon { font-size: 13px; }
+
+#authButtons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
 
 .popup-overlay {
   position: fixed;
@@ -236,27 +269,59 @@ function closePopup() {
   document.getElementById('popupOverlay').classList.remove('show');
 }
 
-// Load credit count di header
 async function loadCreditBar() {
   const raw = localStorage.getItem('ranzai_session');
-  if (!raw) return;
+  const authButtons  = document.getElementById('authButtons');
+  const creditBar    = document.getElementById('creditBar');
+  const bannerNoLogin  = document.getElementById('bannerNotLogin');
+  const bannerNoCredit = document.getElementById('bannerNoCredit');
+
+  // Belum login
+  if (!raw) {
+    authButtons.style.display  = 'flex';
+    creditBar.style.display    = 'none';
+    bannerNoLogin.style.display  = 'flex';
+    bannerNoCredit.style.display = 'none';
+    return;
+  }
+
   const session = JSON.parse(raw);
-  if (!session?.user?.id) return;
+  if (!session?.user?.id) {
+    authButtons.style.display  = 'flex';
+    creditBar.style.display    = 'none';
+    bannerNoLogin.style.display  = 'flex';
+    bannerNoCredit.style.display = 'none';
+    return;
+  }
+
+  // Sudah login — tampilkan credit bar, sembunyikan auth buttons
+  authButtons.style.display  = 'none';
+  creditBar.style.display    = 'inline-flex';
+  bannerNoLogin.style.display  = 'none';
 
   try {
     const res = await fetch(
       `https://cavouyzyasnuygkuwizy.supabase.co/rest/v1/user_credits?user_id=eq.${session.user.id}&select=free_used,paid_credits`,
-      { headers: { apikey: 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r', Authorization: `Bearer ${session.access_token}` } }
+      { headers: {
+        apikey: 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r',
+        Authorization: `Bearer ${session.access_token}`
+      }}
     );
     const data = await res.json();
-    const freeLeft = data[0]?.free_used < 1 ? 1 : 0;
-    const paid = data[0]?.paid_credits || 0;
-    const total = freeLeft + paid;
-    const el = document.getElementById('creditCount');
+    const freeLeft = (data[0]?.free_used || 0) < 1 ? 1 : 0;
+    const paid     = data[0]?.paid_credits || 0;
+    const total    = freeLeft + paid;
+
+    const el  = document.getElementById('creditCount');
     const bar = document.getElementById('creditBar');
-    if (el) {
-      el.textContent = total;
-      if (total === 0) bar.classList.add('low');
+    if (el) el.textContent = total;
+
+    if (total === 0) {
+      bar.classList.add('low');
+      bannerNoCredit.style.display = 'flex';
+    } else {
+      bar.classList.remove('low');
+      bannerNoCredit.style.display = 'none';
     }
   } catch {}
 }
