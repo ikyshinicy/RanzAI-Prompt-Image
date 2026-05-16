@@ -785,15 +785,23 @@
   }
 
   function populateQRPopup(data) {
-    document.getElementById('qrImage').src    = data.qr_code_url || ''
+    // Generate QR image — pakai qr_code_url, fallback ke Google Charts dari qr_string
+    let qrSrc = data.qr_code_url || ''
+    if (!qrSrc && data.qr_string) {
+      qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.qr_string)}`
+    }
+    document.getElementById('qrImage').src = qrSrc
+
     document.getElementById('qrAmount').textContent  = `Rp ${data.amount.toLocaleString('id-ID')}`
     document.getElementById('qrCredits').textContent = `${data.credits} credits`
     document.getElementById('qrOrderId').textContent = data.order_id || '—'
-    // Tampilkan QR string untuk simulator (sandbox)
+
+    // Tampilkan QR string (untuk sandbox simulator)
     if (data.qr_string) {
       document.getElementById('qrStringValue').textContent = data.qr_string
       document.getElementById('qrStringSection').style.display = 'block'
     }
+
     // Hide loading, show content
     document.getElementById('qrLoading').style.display = 'none'
     document.getElementById('qrContent').style.display = 'block'
