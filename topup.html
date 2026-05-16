@@ -631,13 +631,13 @@
 
       // Redirect ke Midtrans payment page
       if (data.payment_url) {
-      document.getElementById('errorMsg').style.display = 'none'
-      document.getElementById('qrSection').style.display = 'block'
-      document.getElementById('qrImage').src = data.qr_code_url
-      document.getElementById('qrOrderId').textContent = data.order_id
-      document.getElementById('qrCredits').textContent = data.credits
-      document.getElementById('qrAmount').textContent = `Rp ${data.amount.toLocaleString('id-ID')}`
-    }
+        document.getElementById('errorMsg').style.display = 'none'
+        document.getElementById('qrSection').style.display = 'block'
+        document.getElementById('qrImage').src = data.qr_code_url
+        document.getElementById('qrOrderId').textContent = data.order_id
+        document.getElementById('qrCredits').textContent = data.credits
+        document.getElementById('qrAmount').textContent = `Rp ${data.amount.toLocaleString('id-ID')}`
+      }
 
     } catch (err) {
       const msgEl = document.getElementById('errorMsg')
