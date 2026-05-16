@@ -58,11 +58,34 @@ async function registerWithEmail() {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON}, body: JSON.stringify({ email, password, data:{ full_name:name } }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error_description || data.msg || 'Pendaftaran gagal.');
-    if (data.session) { saveSession(data); showSuccess('✓ Akun berhasil dibuat. Mengalihkan...'); setTimeout(goToApp, 1000); }
-    else showSuccess('✓ Akun berhasil dibuat.<br>Cek email untuk verifikasi, lalu login.');
-  } catch(err) { showError('⚠ ' + err.message); }
-  finally { setLoading('registerBtn', false, '✦ Buat Akun'); }
-}
+    if (data.session) {
+    
+      saveSession(data);
+    
+      await fetch(`${SUPABASE_URL}/rest/v1/user_credits`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${data.session.access_token}`
+        },
+        body: JSON.stringify({
+          user_id: data.user.id,
+          credits: 1,
+          plan: 'free'
+        })
+      });
+    
+      showSuccess('✓ Akun berhasil dibuat. Mengalihkan...');
+    } else {
+      showSuccess('✓ Akun berhasil dibuat.<br>Cek email untuk verifikasi, lalu login.');
+    }
+    
+    } catch(err) {
+      showError('⚠ ' + err.message);
+    } finally {
+      setLoading('registerBtn', false, '✦ Buat Akun');
+    }
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') registerWithEmail(); });
 </script>
 </body>
