@@ -34,7 +34,7 @@ async function getUserCredits() {
   return data[0].credits || 0;
 }
 
-c function decreaseCredits() {
+async function decreaseCredits() {
   const session = getSession();
 
   const credits = await getUserCredits();
