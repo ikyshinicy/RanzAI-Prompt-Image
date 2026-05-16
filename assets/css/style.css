@@ -1,53 +1,7 @@
-:root {
-  --bg: #0d0d0f;
-  --surface: #141417;
-  --surface-2: #1a1a1f;
+/* =========================
+   RanzAI Premium Orange Theme
+========================= */
 
-  --border: #2a2a30;
-
-  /* PREMIUM FUTURISTIC ORANGE */
-  --accent: #ff9f1c;
-  --accent-hover: #ffb347;
-
-  /* SECONDARY */
-  --accent2: #7c5cfc;
-
-  --text: #f0f0f0;
-  --muted: #6b6b7a;
-
-  --danger-bg: rgba(255,77,77,.08);
-  --danger-border: rgba(255,77,77,.3);
-  --danger-text: #ff8080;
-
-  --grid: rgba(255,255,255,.025);
-  --nav-bg: rgba(13,13,15,.85);
-
-  --radius: 12px;
-}
-
-html[data-theme="light"] {
-  --bg: #f4efe7;
-  --surface: #fffaf3;
-  --surface-2: #efe5d7;
-
-  --border: #d8cab6;
-
-  /* PREMIUM LIGHT ORANGE */
-  --accent: #c46b1a;
-  --accent-hover: #a95711;
-
-  --accent2: #5b46d8;
-
-  --text: #18140f;
-  --muted: #70675c;
-
-  --danger-bg: rgba(210,50,50,.08);
-  --danger-border: rgba(210,50,50,.25);
-  --danger-text: #b42323;
-
-  --grid: rgba(70,45,20,.055);
-  --nav-bg: rgba(244,239,231,.92);
-}
 .badge,
 .hero-badge,
 .mock-badge,
@@ -83,15 +37,97 @@ html[data-theme="light"] {
   border-color: rgba(255,159,28,.3);
 }
 
+.hero-badge::before {
+  background: #ff9f1c;
+}
+
 body::after {
   content: '';
   position: fixed;
-  top: -200px;
+  top: -220px;
   left: 50%;
   transform: translateX(-50%);
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(255,159,28,.07) 0%, transparent 70%);
+  width: 720px;
+  height: 720px;
+  background: radial-gradient(
+    circle,
+    rgba(255,159,28,.08) 0%,
+    transparent 72%
+  );
   pointer-events: none;
   z-index: 0;
+}
+
+.nav-cta,
+.btn-primary,
+.price-btn-primary,
+.btn-generate,
+.btn-submit {
+  background: #ff9f1c !important;
+  color: #0d0d0f !important;
+}
+
+.nav-cta:hover,
+.btn-primary:hover,
+.price-btn-primary:hover,
+.btn-generate:hover,
+.btn-submit:hover {
+  background: #ffb347 !important;
+}
+
+.mock-fmt.active,
+.fmt-btn.active,
+.control-btn.active {
+  color: #ff9f1c !important;
+}
+
+.price-tag {
+  background: #ff9f1c !important;
+  color: #0d0d0f !important;
+}
+
+.price-amount,
+.section-label,
+.option-label,
+.step-num,
+.result-title,
+.footer-logo,
+.nav-logo {
+  color: #ff9f1c !important;
+}
+
+.btn-copy:hover {
+  color: #ff9f1c !important;
+}
+
+.feature:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px rgba(255,159,28,.08);
+}
+
+.price-card.featured {
+  box-shadow: 0 0 28px rgba(255,159,28,.08);
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: #ff9f1c;
+  background: #1a1a1f;
+}
+
+.auth-input:focus,
+.field input:focus {
+  border-color: #ff9f1c !important;
+  box-shadow: 0 0 0 3px rgba(255,159,28,.08);
+}
+
+.logo-mark {
+  color: #ff9f1c !important;
+  border-color: rgba(255,159,28,.3) !important;
+}
+
+.logo-back:hover,
+.card-footer a:hover,
+.terms label a:hover {
+  color: #ffb347 !important;
 }
