@@ -421,19 +421,19 @@
   <!-- Quick amount -->
   <div class="section-label">Pilih Cepat</div>
   <div class="quick-amounts">
-    <button class="quick-btn" onclick="setAmount(5000)">
+    <button class="quick-btn" onclick="setAmount(5000, this)">
       <div class="amount">5k</div>
       <div class="credits">5 credits</div>
     </button>
-    <button class="quick-btn" onclick="setAmount(10000)">
+    <button class="quick-btn" onclick="setAmount(10000, this)">
       <div class="amount">10k</div>
       <div class="credits">10 credits</div>
     </button>
-    <button class="quick-btn" onclick="setAmount(25000)">
+    <button class="quick-btn" onclick="setAmount(25000, this)">
       <div class="amount">25k</div>
       <div class="credits">25 credits</div>
     </button>
-    <button class="quick-btn" onclick="setAmount(50000)">
+    <button class="quick-btn" onclick="setAmount(50000, this)">
       <div class="amount">50k</div>
       <div class="credits">50 credits</div>
     </button>
@@ -641,7 +641,7 @@
 </style>
 
 <!-- QR Popup Element -->
-<div class="qr-popup-overlay" id="qrPopupOverlay" onclick="closeQRPopup(event)">
+<div class="qr-popup-overlay" id="qrPopupOverlay" onclick="if(event.target===this) closeQRPopup()">
   <div class="qr-popup-box" onclick="event.stopPropagation()">
     <button class="qr-popup-close" onclick="closeQRPopup()">✕</button>
 
@@ -659,6 +659,11 @@
       <div class="qr-img-wrap">
         <img id="qrImage" src="" alt="QR Code Pembayaran">
       </div>
+      <!-- Fallback kalau QR tidak tersedia -->
+      <div id="qrImageError" style="display:none; flex-direction:column; align-items:center; gap:8px; padding:20px; background:rgba(255,77,77,.06); border:1px solid rgba(255,77,77,.2); border-radius:12px; margin-bottom:18px;">
+        <div style="font-size:28px">⚠️</div>
+        <div style="font-family:'Space Mono',monospace; font-size:11px; color:#ff8080; text-align:center; line-height:1.7;">QR belum tersedia.<br>Coba beberapa saat lagi.</div>
+      </div>
 
       <div class="qr-info-row">
         <span class="qr-info-label">Total Bayar</span>
@@ -673,14 +678,13 @@
         <span class="qr-info-value" id="qrOrderId" style="font-size:10px">—</span>
       </div>
 
-      <!-- QR String untuk Midtrans Simulator -->
+      <!-- QR String (untuk keperluan debug) -->
       <div id="qrStringSection" style="margin-top:12px; display:none">
-        <div style="font-family:'Space Mono',monospace; font-size:9px; color:#6b6b7a; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">QR String (Sandbox Simulator)</div>
+        <div style="font-family:'Space Mono',monospace; font-size:9px; color:#6b6b7a; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">QR String</div>
         <div style="display:flex; gap:8px; align-items:center;">
           <div id="qrStringValue" style="background:#0d0d0f; border:1px solid #2a2a30; border-radius:6px; padding:8px 10px; font-family:'Space Mono',monospace; font-size:9px; color:#6b6b7a; word-break:break-all; flex:1; max-height:60px; overflow:auto; text-align:left;"></div>
           <button onclick="copyQrString()" id="copyQrBtn" style="background:rgba(232,255,71,.1); border:1px solid rgba(232,255,71,.3); border-radius:6px; padding:8px 10px; font-family:'Space Mono',monospace; font-size:10px; color:#e8ff47; cursor:pointer; flex-shrink:0;">Copy</button>
         </div>
-        <a href="https://simulator.sandbox.midtrans.com/qris/index" target="_blank" style="display:block; margin-top:8px; font-family:'Space Mono',monospace; font-size:10px; color:#e8ff47; text-align:center; opacity:.7;">Buka Midtrans Simulator →</a>
       </div>
 
       <p class="qr-note">
@@ -731,12 +735,12 @@
   }
 
   // ── Amount ──────────────────────────────────────────────────────────
-  function setAmount(val) {
+  function setAmount(val, el) {
     selectedAmount = val
     document.getElementById('amountInput').value = val
     updatePreview()
     document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'))
-    event.currentTarget.classList.add('active')
+    if (el) el.classList.add('active')
   }
 
   function updatePreview() {
@@ -774,30 +778,36 @@
   }
 
   // ── QR Popup helpers ────────────────────────────────────────────────
-  function openQRPopup() {
-    // Show loading state
-    document.getElementById('qrLoading').style.display = 'flex'
-    document.getElementById('qrContent').style.display = 'none'
-    // Show popup
-    const overlay = document.getElementById('qrPopupOverlay')
-    overlay.classList.add('show')
-    document.body.style.overflow = 'hidden'
-  }
+  function openQRPopup(data) {
+    // Reset state
+    document.getElementById('qrStringSection').style.display = 'none'
+    document.getElementById('errorMsg').style.display = 'none'
 
-  function populateQRPopup(data) {
-    console.log('QR DATA:', JSON.stringify(data))
-    // Generate QR image — pakai qr_code_url, fallback ke Google Charts dari qr_string
-    let qrSrc = data.qr_code_url || ''
-    if (!qrSrc && data.qr_string) {
-      qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.qr_string)}`
-    }
-    document.getElementById('qrImage').src = qrSrc
-
+    // Isi data
     document.getElementById('qrAmount').textContent  = `Rp ${data.amount.toLocaleString('id-ID')}`
     document.getElementById('qrCredits').textContent = `${data.credits} credits`
     document.getElementById('qrOrderId').textContent = data.order_id || '—'
 
-    // Tampilkan QR string (untuk sandbox simulator)
+    // Generate QR image
+    let qrSrc = data.qr_code_url || ''
+    if (!qrSrc && data.qr_string) {
+      qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.qr_string)}`
+    }
+
+    const qrImg = document.getElementById('qrImage')
+    const qrWrap = qrImg.closest('.qr-img-wrap')
+    const qrError = document.getElementById('qrImageError')
+
+    if (qrSrc) {
+      qrImg.src = qrSrc
+      qrImg.style.display = 'block'
+      if (qrError) qrError.style.display = 'none'
+    } else {
+      qrImg.style.display = 'none'
+      if (qrError) qrError.style.display = 'flex'
+    }
+
+    // Tampilkan QR string jika ada
     if (data.qr_string) {
       document.getElementById('qrStringValue').textContent = data.qr_string
       document.getElementById('qrStringSection').style.display = 'block'
@@ -806,6 +816,18 @@
     // Hide loading, show content
     document.getElementById('qrLoading').style.display = 'none'
     document.getElementById('qrContent').style.display = 'block'
+
+    // Show popup
+    const overlay = document.getElementById('qrPopupOverlay')
+    overlay.classList.add('show')
+    document.body.style.overflow = 'hidden'
+  }
+
+  function closeQRPopup(fromOverlay) {
+    // fromOverlay = true berarti klik backdrop, false/undefined = klik tombol ✕
+    stopPolling()
+    document.getElementById('qrPopupOverlay').classList.remove('show')
+    document.body.style.overflow = ''
   }
 
   function copyQrString() {
@@ -815,13 +837,6 @@
       btn.textContent = 'Copied!'
       setTimeout(() => { btn.textContent = 'Copy' }, 2000)
     })
-  }
-
-  function closeQRPopup(e) {
-    if (e && e.target !== document.getElementById('qrPopupOverlay')) return
-    stopPolling()
-    document.getElementById('qrPopupOverlay').classList.remove('show')
-    document.body.style.overflow = ''
   }
 
   // ── Polling status pembayaran (setiap 5 detik) ──────────────────────
@@ -886,7 +901,11 @@
     document.getElementById('errorMsg').style.display = 'none'
     document.getElementById('successMsg').style.display = 'none'
 
-    openQRPopup()
+    // Tampilkan loading spinner di popup dulu
+    document.getElementById('qrLoading').style.display = 'flex'
+    document.getElementById('qrContent').style.display = 'none'
+    document.getElementById('qrPopupOverlay').classList.add('show')
+    document.body.style.overflow = 'hidden'
 
     try {
       const res = await fetch(
@@ -909,9 +928,10 @@
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Pembayaran gagal.')
 
-      populateQRPopup(data)
+      // Buka popup dengan data yang sudah ready
+      openQRPopup(data)
 
-      // ✅ Mulai polling setiap 5 detik cek status pembayaran
+      // Mulai polling setiap 5 detik cek status pembayaran
       startPolling(data.order_id)
 
     } catch (err) {
