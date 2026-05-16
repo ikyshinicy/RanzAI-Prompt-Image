@@ -673,6 +673,16 @@
         <span class="qr-info-value" id="qrOrderId" style="font-size:10px">—</span>
       </div>
 
+      <!-- QR String untuk Midtrans Simulator -->
+      <div id="qrStringSection" style="margin-top:12px; display:none">
+        <div style="font-family:'Space Mono',monospace; font-size:9px; color:#6b6b7a; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">QR String (Sandbox Simulator)</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div id="qrStringValue" style="background:#0d0d0f; border:1px solid #2a2a30; border-radius:6px; padding:8px 10px; font-family:'Space Mono',monospace; font-size:9px; color:#6b6b7a; word-break:break-all; flex:1; max-height:60px; overflow:auto; text-align:left;"></div>
+          <button onclick="copyQrString()" id="copyQrBtn" style="background:rgba(232,255,71,.1); border:1px solid rgba(232,255,71,.3); border-radius:6px; padding:8px 10px; font-family:'Space Mono',monospace; font-size:10px; color:#e8ff47; cursor:pointer; flex-shrink:0;">Copy</button>
+        </div>
+        <a href="https://simulator.sandbox.midtrans.com/qris/index" target="_blank" style="display:block; margin-top:8px; font-family:'Space Mono',monospace; font-size:10px; color:#e8ff47; text-align:center; opacity:.7;">Buka Midtrans Simulator →</a>
+      </div>
+
       <p class="qr-note">
         QR berlaku 15 menit · Kredit otomatis masuk<br>
         setelah pembayaran berhasil dikonfirmasi
@@ -779,9 +789,23 @@
     document.getElementById('qrAmount').textContent  = `Rp ${data.amount.toLocaleString('id-ID')}`
     document.getElementById('qrCredits').textContent = `${data.credits} credits`
     document.getElementById('qrOrderId').textContent = data.order_id || '—'
+    // Tampilkan QR string untuk simulator (sandbox)
+    if (data.qr_string) {
+      document.getElementById('qrStringValue').textContent = data.qr_string
+      document.getElementById('qrStringSection').style.display = 'block'
+    }
     // Hide loading, show content
     document.getElementById('qrLoading').style.display = 'none'
     document.getElementById('qrContent').style.display = 'block'
+  }
+
+  function copyQrString() {
+    const val = document.getElementById('qrStringValue').textContent
+    navigator.clipboard.writeText(val).then(() => {
+      const btn = document.getElementById('copyQrBtn')
+      btn.textContent = 'Copied!'
+      setTimeout(() => { btn.textContent = 'Copy' }, 2000)
+    })
   }
 
   function closeQRPopup(e) {
