@@ -1,18 +1,62 @@
 <!DOCTYPE html>
 <html lang="id" data-theme="dark">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Login — RanzAI</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body class="app-page">
-<div class="top-controls"><button class="control-btn" data-lang-btn="id">ID</button><button class="control-btn" data-lang-btn="en">EN</button><button class="control-btn" data-theme-toggle>☾ Dark</button></div>
-<div class="container">
-  <header class="app-header"><div class="badge">✦ RanzAI</div><h1>Login</h1><p class="subtitle">coming soon · auth system</p></header>
-  <div class="result-box" style="display:block;"><div class="result-content">Login page sudah disiapkan. Nanti bagian ini disambungkan ke Supabase Auth.</div></div>
-  <footer class="app-footer"><a href="../index.html">← Back Home</a></footer>
+
+<div class="top-controls">
+  <button class="control-btn" data-lang-btn="id">ID</button>
+  <button class="control-btn" data-lang-btn="en">EN</button>
+  <button class="control-btn" data-theme-toggle>☾ Dark</button>
 </div>
-<script src="../assets/js/ui.js" defer></script>
+
+<div class="container">
+
+<header class="app-header">
+  <div class="badge">✦ RanzAI</div>
+  <h1>Login</h1>
+  <p class="subtitle">Masuk ke akun RanzAI</p>
+</header>
+
+<div class="result-box" style="display:block;padding:24px;">
+
+  <div class="option-group">
+    <div class="option-label">Email</div>
+    <input id="email" type="email" class="auth-input" placeholder="email@email.com">
+  </div>
+
+  <div class="option-group" style="margin-top:16px;">
+    <div class="option-label">Password</div>
+    <input id="password" type="password" class="auth-input" placeholder="••••••••">
+  </div>
+
+  <button class="btn-generate" style="margin-top:20px;" onclick="loginUser()">
+    Login
+  </button>
+
+  <div id="authMessage" class="subtitle" style="margin-top:14px;"></div>
+
+</div>
+
+<footer class="app-footer">
+  Belum punya akun?
+  <a href="register.html">Register</a>
+</footer>
+
+</div>
+
+<script src="../assets/js/ui.js"></script>
+<script src="../assets/js/auth.js"></script>
+
 </body>
 </html>
