@@ -116,7 +116,7 @@ async function generatePrompt() {
 
   generateBtn.disabled = true;
   generateBtn.classList.add('loading');
-  generateBtn.querySelector('.btn-text').textContent = 'Analyzing...';
+  generateBtn.querySelector('.btn-text').textContent = (document.documentElement.lang === 'en' ? 'Analyzing...' : 'Menganalisis...');
   resultBox.style.display = 'none';
   errorMsg.style.display = 'none';
 
@@ -174,7 +174,7 @@ function syntaxHighlight(text) {
 
 function copyResult() {
   navigator.clipboard.writeText(rawResult).then(() => {
-    copyBtn.textContent = '✓ Copied!';
+    copyBtn.textContent = (document.documentElement.lang === 'en' ? '✓ Copied!' : '✓ Tersalin!');
     copyBtn.classList.add('copied');
     setTimeout(() => {
       copyBtn.textContent = 'Copy';
