@@ -381,7 +381,28 @@
     <button class="fmt-btn" onclick="setTargetAI('recraft', this)">Recraft</button>
     <button class="fmt-btn" onclick="setTargetAI('dalle', this)">DALL·E</button>
   </div>
-
+  <!-- Visual Style -->
+  <div class="option-group">
+    <div class="option-label">Visual Style</div>
+  
+    <div class="format-row">
+      <button class="fmt-btn active" onclick="setVisualStyle('normal', this)">Normal</button>
+      <button class="fmt-btn" onclick="setVisualStyle('cinematic', this)">Cinematic</button>
+      <button class="fmt-btn" onclick="setVisualStyle('poster_ads', this)">Poster Ads</button>
+    </div>
+  
+    <div class="format-row" style="margin-top:10px;">
+      <button class="fmt-btn" onclick="setVisualStyle('anime', this)">Anime</button>
+      <button class="fmt-btn" onclick="setVisualStyle('realistic', this)">Realistic</button>
+      <button class="fmt-btn" onclick="setVisualStyle('luxury', this)">Luxury</button>
+    </div>
+  
+    <div class="format-row" style="margin-top:10px;">
+      <button class="fmt-btn" onclick="setVisualStyle('streetwear', this)">Streetwear</button>
+      <button class="fmt-btn" onclick="setVisualStyle('techwear', this)">Techwear</button>
+      <button class="fmt-btn" onclick="setVisualStyle('cyberpunk', this)">Cyberpunk</button>
+    </div>
+  </div>
   <!-- Generate -->
   <button class="btn-generate" id="generateBtn" disabled onclick="generatePrompt()">
     <div class="spinner"></div>
