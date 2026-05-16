@@ -13,6 +13,11 @@
   <button class="control-btn" data-lang-btn="id">ID</button>
   <button class="control-btn" data-lang-btn="en">EN</button>
   <button class="control-btn" data-theme-toggle>☾ Dark</button>
+  <a href="topup.html" class="credit-bar" id="creditBar">
+    <span class="credit-icon">⚡</span>
+    <span class="credit-count" id="creditCount">—</span>
+    <span class="credit-label">credits</span>
+  </a>
 </div>
 
 <div class="container">
@@ -103,5 +108,161 @@
 <script src="assets/js/styles.js" defer></script>
 <script src="assets/js/engine.js" defer></script>
 <script src="assets/js/app.js" defer></script>
+
+<style>
+.credit-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(232,255,71,.08);
+  border: 1px solid rgba(232,255,71,.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #e8ff47;
+  text-decoration: none;
+  transition: all .2s;
+  cursor: pointer;
+}
+.credit-bar:hover { background: rgba(232,255,71,.15); }
+.credit-bar.low { border-color: rgba(255,77,77,.4); color: #ff8080; background: rgba(255,77,77,.08); }
+.credit-icon { font-size: 13px; }
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.popup-overlay.show { opacity: 1; pointer-events: all; }
+.popup-box {
+  background: #141417;
+  border: 1px solid #2a2a30;
+  border-radius: 16px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  position: relative;
+  transform: translateY(16px);
+  transition: transform .25s ease;
+}
+.popup-overlay.show .popup-box { transform: translateY(0); }
+.popup-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 24px; right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e8ff47, transparent);
+}
+.popup-icon { font-size: 36px; margin-bottom: 16px; }
+.popup-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #f0f0f0; margin-bottom: 10px; }
+.popup-desc { font-family: 'Space Mono', monospace; font-size: 12px; color: #6b6b7a; line-height: 1.8; margin-bottom: 20px; }
+.popup-price-info {
+  background: rgba(232,255,71,.06);
+  border: 1px solid rgba(232,255,71,.2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: #e8ff47;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+.popup-price-info span { color: #6b6b7a; margin: 0 6px; }
+.popup-btn-primary {
+  display: block;
+  width: 100%;
+  background: #e8ff47;
+  color: #0d0d0f;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s;
+  margin-bottom: 10px;
+}
+.popup-btn-primary:hover { background: #d4eb3a; }
+.popup-btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #2a2a30;
+  border-radius: 10px;
+  padding: 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #6b6b7a;
+  cursor: pointer;
+  transition: all .2s;
+}
+.popup-btn-secondary:hover { border-color: #6b6b7a; color: #f0f0f0; }
+</style>
+
+<!-- Popup Top Up -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+  <div class="popup-box" onclick="event.stopPropagation()">
+    <div class="popup-icon">⚡</div>
+    <h2 class="popup-title">Credit Kamu Habis</h2>
+    <p class="popup-desc">
+      Kamu sudah pakai 1 generate gratis.<br>
+      Top up kredit untuk lanjut generate.
+    </p>
+    <div class="popup-price-info">
+      Rp 1.000 <span>=</span> 1 generate
+    </div>
+    <a href="topup.html" class="popup-btn-primary">⚡ Top Up Sekarang</a>
+    <button class="popup-btn-secondary" onclick="closePopup()">Nanti saja</button>
+  </div>
+</div>
+
+<script>
+function showTopUpPopup() {
+  document.getElementById('popupOverlay').classList.add('show');
+}
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('show');
+}
+
+// Load credit count di header
+async function loadCreditBar() {
+  const raw = localStorage.getItem('ranzai_session');
+  if (!raw) return;
+  const session = JSON.parse(raw);
+  if (!session?.user?.id) return;
+
+  try {
+    const res = await fetch(
+      `https://cavouyzyasnuygkuwizy.supabase.co/rest/v1/user_credits?user_id=eq.${session.user.id}&select=free_used,paid_credits`,
+      { headers: { apikey: 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r', Authorization: `Bearer ${session.access_token}` } }
+    );
+    const data = await res.json();
+    const freeLeft = data[0]?.free_used < 1 ? 1 : 0;
+    const paid = data[0]?.paid_credits || 0;
+    const total = freeLeft + paid;
+    const el = document.getElementById('creditCount');
+    const bar = document.getElementById('creditBar');
+    if (el) {
+      el.textContent = total;
+      if (total === 0) bar.classList.add('low');
+    }
+  } catch {}
+}
+
+window.addEventListener('DOMContentLoaded', loadCreditBar);
+</script>
+
 </body>
 </html>
