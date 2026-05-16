@@ -630,7 +630,7 @@
       if (!res.ok) throw new Error(data.error || 'Pembayaran gagal.')
 
       // Redirect ke Midtrans payment page
-      if (data.payment_url) {
+      if (data.qr_code_url) {
         document.getElementById('errorMsg').style.display = 'none'
         document.getElementById('qrSection').style.display = 'block'
         document.getElementById('qrImage').src = data.qr_code_url
