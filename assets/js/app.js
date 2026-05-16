@@ -9,7 +9,7 @@ let currentVisualStyle = 'normal';
 let rawResult = '';
 
 const SUPABASE_URL = 'https://cavouyzyasnuygkuwizy.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r';
+const SUPABASE_PUBLISHABLE_KEY = 'GANTI_DENGAN_ANON_KEY_KAMU';
 const GENERATE_ENDPOINT = 'https://cavouyzyasnuygkuwizy.supabase.co/functions/v1/generate-prompt';
 
 // ── Session ──────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ async function generatePrompt() {
   const hasPaid    = credits.paid_credits > 0;
 
   if (!canUseFree && !hasPaid) {
-    return showError('⚠ Credit habis. Silakan top up untuk melanjutkan.');
+    return showTopUpPopup();
   }
 
   generateBtn.disabled = true;
@@ -268,4 +268,13 @@ function copyResult() {
 function showError(msg) {
   errorMsg.textContent = msg;
   errorMsg.style.display = 'block';
+}
+
+// ── Popup Top Up ──────────────────────────────────────────────────────
+function showTopUpPopup() {
+  document.getElementById("popupOverlay").classList.add("show");
+}
+
+function closePopup() {
+  document.getElementById("popupOverlay").classList.remove("show");
 }
