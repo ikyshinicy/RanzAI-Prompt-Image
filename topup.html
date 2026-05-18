@@ -283,6 +283,16 @@
     padding: 2px 6px;
   }
 
+  .payment-group-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    margin-top: 4px;
+  }
+
   /* Summary */
   .summary-box {
     background: var(--surface);
@@ -442,37 +452,95 @@
   <!-- Payment method -->
   <div class="payment-section">
     <div class="section-label">Metode Pembayaran</div>
-    <div class="payment-options">
 
-      <label class="payment-option active" id="opt-qris">
+    <!-- QRIS -->
+    <div class="payment-group-label">QRIS</div>
+    <div class="payment-options" style="margin-bottom:14px">
+      <label class="payment-option active">
         <input type="radio" name="payment" value="qris" checked onchange="selectPayment(this)">
         <span class="payment-icon">📱</span>
         <div class="payment-info">
           <div class="payment-name">QRIS</div>
-          <div class="payment-desc">GoPay, OVO, Dana, ShopeePay, semua bank</div>
+          <div class="payment-desc">GoPay, OVO, Dana, ShopeePay, semua m-banking</div>
         </div>
         <span class="payment-badge">POPULER</span>
       </label>
+    </div>
 
-      <label class="payment-option" id="opt-transfer">
-        <input type="radio" name="payment" value="bank_transfer" onchange="selectPayment(this)">
-        <span class="payment-icon">🏦</span>
-        <div class="payment-info">
-          <div class="payment-name">Transfer Bank</div>
-          <div class="payment-desc">BCA, Mandiri, BNI, BRI</div>
-        </div>
-      </label>
-
-      <label class="payment-option" id="opt-gopay">
+    <!-- E-Wallet -->
+    <div class="payment-group-label">E-Wallet</div>
+    <div class="payment-options" style="margin-bottom:14px">
+      <label class="payment-option">
         <input type="radio" name="payment" value="gopay" onchange="selectPayment(this)">
         <span class="payment-icon">💚</span>
         <div class="payment-info">
           <div class="payment-name">GoPay</div>
-          <div class="payment-desc">Bayar langsung via GoPay</div>
+          <div class="payment-desc">Bayar via aplikasi Gojek</div>
         </div>
       </label>
-
+      <label class="payment-option">
+        <input type="radio" name="payment" value="ovo" onchange="selectPayment(this)">
+        <span class="payment-icon">💜</span>
+        <div class="payment-info">
+          <div class="payment-name">OVO</div>
+          <div class="payment-desc">Bayar via aplikasi OVO</div>
+        </div>
+      </label>
+      <label class="payment-option">
+        <input type="radio" name="payment" value="dana" onchange="selectPayment(this)">
+        <span class="payment-icon">💙</span>
+        <div class="payment-info">
+          <div class="payment-name">DANA</div>
+          <div class="payment-desc">Bayar via aplikasi DANA</div>
+        </div>
+      </label>
+      <label class="payment-option">
+        <input type="radio" name="payment" value="shopeepay" onchange="selectPayment(this)">
+        <span class="payment-icon">🧡</span>
+        <div class="payment-info">
+          <div class="payment-name">ShopeePay</div>
+          <div class="payment-desc">Bayar via aplikasi Shopee</div>
+        </div>
+      </label>
     </div>
+
+    <!-- Virtual Account -->
+    <div class="payment-group-label">Virtual Account</div>
+    <div class="payment-options">
+      <label class="payment-option">
+        <input type="radio" name="payment" value="va_bca" onchange="selectPayment(this)">
+        <span class="payment-icon">🏦</span>
+        <div class="payment-info">
+          <div class="payment-name">VA BCA</div>
+          <div class="payment-desc">Transfer via ATM / m-banking BCA</div>
+        </div>
+      </label>
+      <label class="payment-option">
+        <input type="radio" name="payment" value="va_bni" onchange="selectPayment(this)">
+        <span class="payment-icon">🏦</span>
+        <div class="payment-info">
+          <div class="payment-name">VA BNI</div>
+          <div class="payment-desc">Transfer via ATM / m-banking BNI</div>
+        </div>
+      </label>
+      <label class="payment-option">
+        <input type="radio" name="payment" value="va_bri" onchange="selectPayment(this)">
+        <span class="payment-icon">🏦</span>
+        <div class="payment-info">
+          <div class="payment-name">VA BRI</div>
+          <div class="payment-desc">Transfer via ATM / m-banking BRI</div>
+        </div>
+      </label>
+      <label class="payment-option">
+        <input type="radio" name="payment" value="va_mandiri" onchange="selectPayment(this)">
+        <span class="payment-icon">🏦</span>
+        <div class="payment-info">
+          <div class="payment-name">VA Mandiri</div>
+          <div class="payment-desc">Transfer via ATM / m-banking Mandiri</div>
+        </div>
+      </label>
+    </div>
+
   </div>
 
   <!-- Summary -->
@@ -498,7 +566,7 @@
   </button>
 
   <p class="note">
-    Pembayaran diproses via Midtrans · Aman & terenkripsi<br>
+    Pembayaran diproses via iPaymu · Aman & terenkripsi<br>
     Kredit otomatis masuk setelah pembayaran berhasil
   </p>
 
@@ -645,8 +713,8 @@
   <div class="qr-popup-box" onclick="event.stopPropagation()">
     <button class="qr-popup-close" onclick="closeQRPopup()">✕</button>
 
-    <div class="qr-popup-title">📱 Scan QR untuk Bayar</div>
-    <div class="qr-popup-subtitle">Gunakan GoPay, OVO, Dana, ShopeePay, atau m-Banking</div>
+    <div class="qr-popup-title" id="popupTitle">📱 Scan QR untuk Bayar</div>
+    <div class="qr-popup-subtitle" id="popupSubtitle">Gunakan GoPay, OVO, Dana, ShopeePay, atau m-Banking</div>
 
     <!-- Loading state -->
     <div class="qr-loading" id="qrLoading">
@@ -777,47 +845,92 @@
     radio.closest('.payment-option').classList.add('active')
   }
 
+  // Cek apakah metode pakai QR atau redirect
+  function isQrisMethod(type) { return type === 'qris' }
+  function isEwalletMethod(type) { return ['gopay','ovo','dana','shopeepay'].includes(type) }
+  function isVaMethod(type) { return type.startsWith('va_') }
+
   // ── QR Popup helpers ────────────────────────────────────────────────
   function openQRPopup(data) {
-    // Reset state
     document.getElementById('qrStringSection').style.display = 'none'
     document.getElementById('errorMsg').style.display = 'none'
 
-    // Isi data
     document.getElementById('qrAmount').textContent  = `Rp ${data.amount.toLocaleString('id-ID')}`
     document.getElementById('qrCredits').textContent = `${data.credits} credits`
     document.getElementById('qrOrderId').textContent = data.order_id || '—'
 
-    // Generate QR image
-    let qrSrc = data.qr_code_url || ''
-    if (!qrSrc && data.qr_string) {
-      qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.qr_string)}`
+    const isQris = isQrisMethod(selectedPayment)
+
+    // Update judul popup
+    if (isQris) {
+      document.getElementById('popupTitle').textContent = '📱 Scan QR untuk Bayar'
+      document.getElementById('popupSubtitle').textContent = 'Gunakan GoPay, OVO, Dana, ShopeePay, atau m-Banking'
+    } else if (isEwalletMethod(selectedPayment)) {
+      document.getElementById('popupTitle').textContent = '📲 Lanjut ke Halaman Bayar'
+      document.getElementById('popupSubtitle').textContent = 'Kamu akan diarahkan ke halaman pembayaran'
+    } else {
+      document.getElementById('popupTitle').textContent = '🏦 Virtual Account'
+      document.getElementById('popupSubtitle').textContent = 'Transfer ke nomor VA berikut'
     }
 
-    const qrImg = document.getElementById('qrImage')
-    const qrWrap = qrImg.closest('.qr-img-wrap')
+    // Generate QR image (hanya untuk QRIS)
+    const qrImg   = document.getElementById('qrImage')
+    const qrWrap  = document.querySelector('.qr-img-wrap')
     const qrError = document.getElementById('qrImageError')
 
-    if (qrSrc) {
-      qrImg.src = qrSrc
-      qrImg.style.display = 'block'
-      if (qrError) qrError.style.display = 'none'
+    if (isQris) {
+      qrWrap.style.display = 'inline-flex'
+      let qrSrc = data.qr_code_url || ''
+      if (!qrSrc && data.qr_string) {
+        qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.qr_string)}`
+      }
+      if (qrSrc) {
+        qrImg.src = qrSrc
+        qrImg.style.display = 'block'
+        if (qrError) qrError.style.display = 'none'
+      } else {
+        qrImg.style.display = 'none'
+        if (qrError) qrError.style.display = 'flex'
+      }
+      if (data.qr_string) {
+        document.getElementById('qrStringValue').textContent = data.qr_string
+        document.getElementById('qrStringSection').style.display = 'block'
+      }
     } else {
-      qrImg.style.display = 'none'
-      if (qrError) qrError.style.display = 'flex'
+      // Sembunyikan area QR untuk VA & e-wallet
+      qrWrap.style.display = 'none'
+      if (qrError) qrError.style.display = 'none'
     }
 
-    // Tampilkan QR string jika ada
-    if (data.qr_string) {
-      document.getElementById('qrStringValue').textContent = data.qr_string
-      document.getElementById('qrStringSection').style.display = 'block'
+    // Tombol lanjut bayar (untuk e-wallet & VA)
+    let btnLanjut = document.getElementById('btnLanjutBayar')
+    if (!btnLanjut) {
+      btnLanjut = document.createElement('a')
+      btnLanjut.id = 'btnLanjutBayar'
+      btnLanjut.target = '_blank'
+      btnLanjut.style.cssText = `
+        display:block; margin:14px 0 0; padding:14px;
+        background:#e8ff47; color:#0d0d0f; border-radius:10px;
+        font-family:'Syne',sans-serif; font-size:15px; font-weight:800;
+        text-decoration:none; letter-spacing:1px; text-align:center;
+        transition:background .2s;
+      `
+      document.getElementById('qrContent').appendChild(btnLanjut)
     }
 
-    // Hide loading, show content
+    if (!isQris && data.payment_url) {
+      btnLanjut.href = data.payment_url
+      btnLanjut.textContent = isEwalletMethod(selectedPayment)
+        ? '⚡ Buka Halaman Bayar'
+        : '⚡ Lihat Nomor VA'
+      btnLanjut.style.display = 'block'
+    } else {
+      btnLanjut.style.display = 'none'
+    }
+
     document.getElementById('qrLoading').style.display = 'none'
     document.getElementById('qrContent').style.display = 'block'
 
-    // Show popup
     const overlay = document.getElementById('qrPopupOverlay')
     overlay.classList.add('show')
     document.body.style.overflow = 'hidden'
