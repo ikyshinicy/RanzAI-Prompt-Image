@@ -25,7 +25,7 @@ function setLoading(buttonId, on, idleText) {
 }
 
 function registerWithGoogle() {
-  window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + '/RanzAI/app.html')}`;
+  window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + '/RanzAI-Prompt-Image/app.html')}`;
 }
 
 function loginWithGoogle() {
