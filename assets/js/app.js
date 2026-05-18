@@ -1,11 +1,18 @@
 // RanzAI App Logic
 let imageBase64 = null;
 let imageMime = 'image/jpeg';
+
+let currentFormat = 'json';
+let currentTargetAI = 'chatgpt';
+let currentVisualStyle = 'normal';
+
+let rawResult = '';
+
 const SUPABASE_URL = 'https://cavouyzyasnuygkuwizy.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r';
 const GENERATE_ENDPOINT = 'https://cavouyzyasnuygkuwizy.supabase.co/functions/v1/generate-prompt';
 
-// Baca token dari URL hash setelah login Google
+// ── Baca token dari URL hash setelah login Google ─────────────────────
 (async function readHashToken() {
   const hash = window.location.hash;
   if (!hash.includes('access_token')) return;
@@ -28,9 +35,6 @@ const GENERATE_ENDPOINT = 'https://cavouyzyasnuygkuwizy.supabase.co/functions/v1
   window.history.replaceState({}, '', window.location.pathname);
 })();
 
-
-// ── Session ──────────────────────────────────────────────────────────
-function getSession() {
   const raw = localStorage.getItem('ranzai_session');
   return raw ? JSON.parse(raw) : null;
 }
