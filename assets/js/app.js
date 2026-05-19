@@ -35,6 +35,8 @@ const GENERATE_ENDPOINT = 'https://cavouyzyasnuygkuwizy.supabase.co/functions/v1
   window.history.replaceState({}, '', window.location.pathname);
 })();
 
+// ── Session ──────────────────────────────────────────────────────────
+function getSession() {
   const raw = localStorage.getItem('ranzai_session');
   return raw ? JSON.parse(raw) : null;
 }
