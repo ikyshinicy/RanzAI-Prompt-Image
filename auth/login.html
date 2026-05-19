@@ -29,20 +29,40 @@
 <script src="../assets/js/auth.js"></script>
 <script>
 async function loginWithEmail() {
-  const email = document.getElementById('emailInput').value.trim();
+  const email    = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passwordInput').value;
   if (!email || !email.includes('@')) return showError('Email tidak valid.');
   if (!password) return showError('Password wajib diisi.');
+
   setLoading('loginBtn', true, '✦ Login');
+
   try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON}, body: JSON.stringify({ email, password }) });
+    const res = await fetch(
+      `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
+        body: JSON.stringify({ email, password })
+      }
+    );
     const data = await res.json();
+
     if (!res.ok) throw new Error(data.error_description || data.msg || 'Login gagal.');
-    saveSession({ session: data, user: data.user });
+
+    // simpan session — format flat dari Supabase token endpoint
+    const ok = saveSession({ session: data, user: data.user });
+    if (!ok) throw new Error('Gagal menyimpan session. Coba lagi.');
+
     showSuccess('✓ Login berhasil. Mengalihkan...');
-    setTimeout(goToApp, 900);
-  } catch(err) { showError('⚠ ' + err.message); }
-  finally { setLoading('loginBtn', false, '✦ Login'); }
+
+    // tunggu sebentar lalu redirect
+    setTimeout(goToDashboard, 800);
+
+  } catch(err) {
+    showError('⚠ ' + err.message);
+  } finally {
+    setLoading('loginBtn', false, '✦ Login');
+  }
 }
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') loginWithEmail(); });
 </script>
