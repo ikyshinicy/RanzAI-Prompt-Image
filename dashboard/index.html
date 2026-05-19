@@ -1238,25 +1238,25 @@ body.dash-body {
   </div>
 </div>
 
-<!-- JS dari assets (path relatif dari dashboard/) -->
+<!-- auth.js harus dimuat pertama — berisi requireAuth & refresh logic -->
+<script src="../assets/js/auth.js"></script>
 <script src="../assets/js/ui.js" defer></script>
 <script src="../assets/js/targets.js" defer></script>
 <script src="../assets/js/styles.js" defer></script>
 <script src="../assets/js/engine.js" defer></script>
 
 <script>
-/* ── Session Guard — redirect kalau belum login ── */
-(function() {
-  try {
-    const raw = localStorage.getItem('ranzai_session');
-    if (!raw) throw new Error('no session');
-    const session = JSON.parse(raw);
-    if (!session?.access_token || !session?.user?.id) throw new Error('invalid session');
-    // session valid, lanjut
-  } catch(e) {
-    window.location.replace('../auth/login.html');
-  }
-})();
+/* ── Session Guard — pakai requireAuth dari auth.js ── */
+// requireAuth() otomatis refresh token kalau expired
+// kalau refresh gagal → redirect ke login
+document.addEventListener('DOMContentLoaded', async () => {
+  const session = await requireAuth();
+  if (!session) return; // requireAuth sudah handle redirect
+  // lanjut init dashboard
+  loadUserInfo(session);
+  loadCredits(session);
+  renderHistory();
+});
 const SUPABASE_URL = 'https://cavouyzyasnuygkuwizy.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r';
 const GENERATE_ENDPOINT = 'https://cavouyzyasnuygkuwizy.supabase.co/functions/v1/generate-prompt';
@@ -1284,21 +1284,27 @@ function dsNav(id, btn) {
   if (btn) btn.classList.add('active');
 }
 
-/* ── Credits ───────────────────────────────── */
-async function loadCredits() {
-  const session = getSession();
+/* ── User info ─────────────────────────────── */
+function loadUserInfo(session) {
+  const user = session?.user;
+  if (!user) return;
+  const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+  document.getElementById('sbUserName').textContent = name;
+  document.getElementById('setName').value  = name;
+  document.getElementById('setEmail').value = user.email || '';
+  document.getElementById('sbUserPlan').textContent = (user.user_metadata?.plan || 'Free').toUpperCase();
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Pagi' : h < 15 ? 'Siang' : h < 18 ? 'Sore' : 'Malam';
+  document.getElementById('sbGreet').textContent = greet + ', ' + name + '!';
+}
 
+/* ── Credits ───────────────────────────────── */
+async function loadCredits(session) {
   const numEl  = document.getElementById('sbCreditNum');
   const subEl  = document.getElementById('sbCreditSub');
   const toolEl = document.getElementById('toolsCreditLeft');
 
-  if (!session?.user?.id) {
-    numEl.textContent  = '0';
-    subEl.textContent  = 'belum login';
-    toolEl.textContent = '0';
-    window.location.href = '../auth/login.html';
-    return;
-  }
+  if (!session?.user?.id) return;
 
   try {
     const res = await fetch(
@@ -1313,57 +1319,28 @@ async function loadCredits() {
     const total    = freeLeft + paid;
     const plan     = (row.plan || 'free').toUpperCase();
 
-    // sidebar
     numEl.textContent = total;
     subEl.textContent = `${freeLeft} free · ${paid} paid`;
 
-    // home stats — dihapus, tidak ada lagi
-    // document.getElementById('homeTotal') dst tidak ada
-
-    // billing
     document.getElementById('billFree').textContent  = freeLeft;
     document.getElementById('billPaid').textContent  = paid;
     document.getElementById('billTotal').textContent = total;
     document.getElementById('billPlan').textContent  = plan;
-
-    // tools bar
     if (toolEl) toolEl.textContent = total;
-
-    // settings
     document.getElementById('setPlan').textContent = plan;
 
-    // low credit warning
     if (total === 0) {
       document.getElementById('bannerNoCredit').style.display = 'flex';
       numEl.style.color = 'var(--danger)';
     }
-
   } catch(e) {
     numEl.textContent = '?';
   }
 }
 
-/* ── User info ─────────────────────────────── */
-function loadUserInfo() {
-  const session = getSession();
-  if (!session?.user) return;
-  const user = session.user;
-  const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-
-  document.getElementById('sbUserName').textContent = name;
-  document.getElementById('setName').value  = name;
-  document.getElementById('setEmail').value = user.email || '';
-  document.getElementById('sbUserPlan').textContent = (user.user_metadata?.plan || 'Free').toUpperCase();
-
-  const h = new Date().getHours();
-  const greet = h < 12 ? 'Pagi' : h < 15 ? 'Siang' : h < 18 ? 'Sore' : 'Malam';
-  document.getElementById('sbGreet').textContent = greet + ', ' + name + '!';
-}
-
 /* ── Logout ────────────────────────────────── */
 function dsLogout() {
-  localStorage.removeItem('ranzai_session');
-  window.location.href = '../auth/login.html';
+  logout(); // dari auth.js
 }
 
 /* ── Tools: upload ─────────────────────────── */
@@ -1438,11 +1415,9 @@ function loadImage(file) {
 async function generatePrompt() {
   if (!imageBase64) return;
 
-  const session = getSession();
-  if (!session?.user?.id) {
-    window.location.href = '../auth/login.html';
-    return;
-  }
+  // auto refresh token kalau expired
+  const session = await requireAuth();
+  if (!session) return;
 
   // cek kredit
   const res = await fetch(
@@ -1607,12 +1582,7 @@ function timeAgo(ts) {
   return Math.floor(diff/1440) + ' hari lalu';
 }
 
-/* ── Init ──────────────────────────────────── */
-window.addEventListener('DOMContentLoaded', () => {
-  loadUserInfo();
-  loadCredits();
-  renderHistory();
-});
+/* ── Generate: ambil session fresh ────────── */
 </script>
 
 </body>
