@@ -5,289 +5,1608 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RanzAI — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<!-- path dari dashboard/ ke assets/ -->
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
-  .dash-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin: 24px 0;
-  }
-  .dash-card {
-    background: rgba(255,255,255,.04);
-    border: 1px solid #2a2a30;
-    border-radius: 14px;
-    padding: 20px;
-    font-family: 'Space Mono', monospace;
-  }
-  .dash-card .card-label {
-    font-size: 10px;
-    color: #6b6b7a;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-  }
-  .dash-card .card-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #e8ff47;
-    font-family: 'Syne', sans-serif;
-  }
-  .dash-card .card-sub {
-    font-size: 10px;
-    color: #6b6b7a;
-    margin-top: 4px;
-  }
-  .dash-card.accent {
-    border-color: rgba(232,255,71,.3);
-    background: rgba(232,255,71,.05);
-  }
-  .user-card {
-    background: rgba(255,255,255,.04);
-    border: 1px solid #2a2a30;
-    border-radius: 14px;
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    font-family: 'Space Mono', monospace;
-  }
-  .user-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(232,255,71,.15);
-    border: 1px solid rgba(232,255,71,.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-  .user-info .user-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: #f0f0f0;
-  }
-  .user-info .user-email {
-    font-size: 11px;
-    color: #6b6b7a;
-    margin-top: 2px;
-  }
-  .user-info .user-plan {
-    display: inline-block;
-    margin-top: 6px;
-    font-size: 10px;
-    padding: 2px 10px;
-    border-radius: 20px;
-    background: rgba(124,92,252,.15);
-    border: 1px solid rgba(124,92,252,.3);
-    color: #a090f0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .dash-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin: 24px 0;
-  }
-  .btn-dash {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 12px 20px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all .2s;
-  }
-  .btn-dash.primary {
-    background: #e8ff47;
-    color: #0d0d0f;
-  }
-  .btn-dash.primary:hover { background: #d4eb3a; }
-  .btn-dash.secondary {
-    background: transparent;
-    color: #f0f0f0;
-    border: 1px solid #2a2a30;
-  }
-  .btn-dash.secondary:hover { border-color: #6b6b7a; }
-  .btn-dash.danger {
-    background: transparent;
-    color: #ff6b6b;
-    border: 1px solid rgba(255,107,107,.3);
-  }
-  .btn-dash.danger:hover { background: rgba(255,107,107,.1); }
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: #6b6b7a;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 28px 0 12px;
-  }
-  .loading-text {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: #6b6b7a;
-  }
-  .topup-banner {
-    background: rgba(232,255,71,.06);
-    border: 1px solid rgba(232,255,71,.2);
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-  .topup-banner .topup-text {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: #e8ff47;
-  }
-  .topup-banner .topup-sub {
-    font-size: 10px;
-    color: #6b6b7a;
-    margin-top: 2px;
-  }
+/* ============================================================
+   DASHBOARD SHELL — sidebar + main area
+   Tidak mengubah style.css asli, semua scoped ke .dash-*
+============================================================ */
+
+/* Reset body untuk dashboard */
+body.dash-body {
+  display: block;
+  padding: 0;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.dash-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── SIDEBAR ─────────────────────────────────── */
+.dash-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: rgba(17,17,21,.97);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  z-index: 10;
+}
+
+.ds-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.ds-logo-mark {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.ds-logo-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  opacity: .4;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* nav items */
+.ds-nav {
+  flex: 1;
+  padding: 10px 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.ds-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: all .15s;
+  letter-spacing: .5px;
+}
+.ds-nav-item:hover {
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+}
+.ds-nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+.ds-nav-item .ds-ni {
+  font-size: 15px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* credit block — paling penting */
+.ds-credit {
+  margin: 10px;
+  background: var(--bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 14px;
+  padding: 16px 16px 12px;
+}
+.ds-credit-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  opacity: .6;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.ds-credit-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.ds-credit-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+.ds-credit-unit {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.ds-credit-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  opacity: .45;
+  margin-bottom: 12px;
+}
+.ds-btn-topup {
+  display: block;
+  width: 100%;
+  background: var(--accent);
+  color: #0d0d0f;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background .2s, transform .15s;
+  letter-spacing: .3px;
+}
+.ds-btn-topup:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* user row */
+.ds-user {
+  padding: 10px 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.ds-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.ds-user-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-user-plan {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  opacity: .5;
+}
+
+/* ── MAIN CONTENT ────────────────────────────── */
+.dash-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  background: var(--bg);
+}
+
+/* each page panel */
+.ds-page {
+  display: none;
+  min-height: 100vh;
+  padding: 0;
+}
+.ds-page.active { display: block; }
+
+/* ── DASHBOARD HOME PAGE ─────────────────────── */
+.ds-home-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 32px 60px;
+}
+.ds-home-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.ds-home-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.ds-home-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ds-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.ds-stat-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  font-family: 'Space Mono', monospace;
+}
+.ds-stat-card.accent {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+.ds-stat-label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.ds-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+.ds-stat-card:not(.accent) .ds-stat-val { color: var(--muted); }
+.ds-stat-desc {
+  font-size: 9px;
+  color: var(--muted);
+  opacity: .4;
+  margin-top: 4px;
+}
+
+.ds-sec-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  opacity: .5;
+}
+.ds-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.ds-quick-btn {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  cursor: pointer;
+  text-align: left;
+  transition: all .15s;
+  font-family: 'Space Mono', monospace;
+  width: 100%;
+}
+.ds-quick-btn:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+.ds-quick-btn.primary {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+.ds-quick-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+.ds-quick-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.ds-quick-btn.primary .ds-quick-label { color: var(--accent); }
+.ds-quick-desc { font-size: 10px; color: var(--muted); }
+
+/* ── TOOLS PAGE — EXACT replica of app.html ──── */
+/* Dibungkus .dash-tools-wrap supaya tidak bentrok */
+.dash-tools-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+/* header sama persis */
+.dash-tools-wrap .app-header { margin-bottom: 32px; }
+
+/* upload zone */
+.dash-tools-wrap .upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color .2s, background .2s;
+  margin-bottom: 20px;
+}
+.dash-tools-wrap .upload-zone:hover,
+.dash-tools-wrap .upload-zone.drag-over {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+.dash-tools-wrap .upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.dash-tools-wrap .upload-icon {
+  font-size: 28px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 10px;
+  opacity: .5;
+}
+.dash-tools-wrap .upload-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.dash-tools-wrap .upload-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: .4;
+}
+
+/* preview */
+.dash-tools-wrap .preview-wrap {
+  display: none;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  position: relative;
+}
+.dash-tools-wrap .preview-wrap img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  display: block;
+  background: var(--surface-3);
+}
+.dash-tools-wrap .preview-remove {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.dash-tools-wrap .preview-remove:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+/* option groups */
+.dash-tools-wrap .option-group {
+  margin-bottom: 20px;
+}
+.dash-tools-wrap .option-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.dash-tools-wrap .format-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.dash-tools-wrap .fmt-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  white-space: nowrap;
+}
+.dash-tools-wrap .fmt-btn:hover {
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+.dash-tools-wrap .fmt-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0d0d0f;
+  font-weight: 700;
+}
+
+/* generate button */
+.dash-tools-wrap .btn-generate {
+  width: 100%;
+  padding: 18px;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: .5px;
+  margin-top: 4px;
+  margin-bottom: 20px;
+}
+.dash-tools-wrap .btn-generate:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  transform: none;
+}
+.dash-tools-wrap .btn-generate .spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(13,13,15,.3);
+  border-top-color: #0d0d0f;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.dash-tools-wrap .btn-generate.loading .spinner { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* result box */
+.dash-tools-wrap .result-box {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.dash-tools-wrap .result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.dash-tools-wrap .result-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.dash-tools-wrap .btn-copy {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.dash-tools-wrap .btn-copy:hover,
+.dash-tools-wrap .btn-copy.copied {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.dash-tools-wrap .result-content {
+  padding: 20px 18px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.dash-tools-wrap .result-content .key   { color: var(--accent); }
+.dash-tools-wrap .result-content .string { color: var(--text); }
+.dash-tools-wrap .result-content .number { color: #a0cfff; }
+
+/* error */
+.dash-tools-wrap .error-msg {
+  display: none;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--danger);
+  margin-bottom: 16px;
+}
+
+/* credit info bar at bottom of tools */
+.ds-credit-info-bar {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+  opacity: .5;
+}
+.ds-credit-info-bar strong { color: var(--accent); opacity: 1; }
+
+/* ── HISTORY PAGE ────────────────────────────── */
+.ds-hist-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 32px 60px;
+}
+.ds-page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.ds-page-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  opacity: .6;
+}
+.ds-hist-list { display: flex; flex-direction: column; gap: 8px; }
+.ds-hist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px;
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.ds-hist-item:hover { border-color: var(--accent-border); }
+.ds-hist-ico { font-size: 15px; flex-shrink: 0; margin-top: 2px; opacity: .6; }
+.ds-hist-body { flex: 1; min-width: 0; }
+.ds-hist-txt {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-hist-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  opacity: .35;
+  margin-top: 4px;
+}
+.ds-hist-copy {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all .15s;
+}
+.ds-hist-item:hover .ds-hist-copy {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+/* ── BILLING PAGE ────────────────────────────── */
+.ds-bill-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 32px 60px;
+}
+.ds-bill-card {
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.ds-bill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+}
+.ds-bill-row:last-child { border-bottom: none; }
+.ds-bill-key { color: var(--muted); }
+.ds-bill-val {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text);
+}
+.ds-bill-row.total-row { background: var(--accent-soft); }
+.ds-bill-row.total-row .ds-bill-val {
+  font-size: 22px;
+  color: var(--accent);
+}
+.ds-topup-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.ds-tp-card {
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.ds-tp-card:hover,
+.ds-tp-card.popular {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+.ds-tp-amt {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.ds-tp-cr {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.ds-tp-badge {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: #0d0d0f;
+  background: var(--accent);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+.ds-btn-topup-full {
+  display: block;
+  width: 100%;
+  background: var(--accent);
+  color: #0d0d0f;
+  border: none;
+  border-radius: var(--radius);
+  padding: 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background .2s, transform .15s;
+  letter-spacing: .5px;
+}
+.ds-btn-topup-full:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.ds-bill-note {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  opacity: .4;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ── SETTINGS PAGE ───────────────────────────── */
+.ds-set-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 32px 60px;
+}
+.ds-set-group {
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.ds-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+}
+.ds-set-row:last-child { border-bottom: none; }
+.ds-set-key { color: var(--muted); }
+.ds-set-input {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 7px 12px;
+  outline: none;
+  width: 200px;
+  transition: border-color .2s;
+}
+.ds-set-input:focus { border-color: var(--accent-border); }
+.ds-btn-save {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--accent);
+  color: #0d0d0f;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.ds-btn-save:hover { background: var(--accent-hover); }
+.ds-btn-logout {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.ds-btn-logout:hover { background: var(--danger-bg); }
+
+/* popup top up (sama dengan app.html) */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.popup-overlay.show { opacity: 1; pointer-events: all; }
+.popup-box {
+  background: #141417;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  position: relative;
+  transform: translateY(16px);
+  transition: transform .25s ease;
+}
+.popup-overlay.show .popup-box { transform: translateY(0); }
+.popup-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 24px; right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.popup-icon { font-size: 36px; margin-bottom: 16px; }
+.popup-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.popup-desc {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+.popup-price-info {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+.popup-price-info span { color: var(--muted); margin: 0 6px; }
+.popup-btn-primary {
+  display: block;
+  width: 100%;
+  background: var(--accent);
+  color: #0d0d0f;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s;
+  margin-bottom: 10px;
+}
+.popup-btn-primary:hover { background: var(--accent-hover); }
+.popup-btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.popup-btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+
+/* banner login */
+.ds-banner-login {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: rgba(124,92,252,.08);
+  border: 1px solid rgba(124,92,252,.3);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.ds-banner-login-txt {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #a090f0;
+  line-height: 1.6;
+}
+.ds-banner-login-btns { display: flex; gap: 8px; flex-shrink: 0; }
+.ds-banner-login a {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  border-radius: 8px;
+  padding: 7px 14px;
+  text-decoration: none;
+  transition: all .2s;
+}
+.ds-banner-login a.login-btn {
+  color: #a090f0;
+  border: 1px solid rgba(124,92,252,.4);
+}
+.ds-banner-login a.reg-btn {
+  color: #0d0d0f;
+  background: var(--accent);
+  font-weight: 700;
+}
+
+/* no-credit banner */
+.ds-banner-nocredit {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
 </style>
 </head>
-<body class="app-page">
+<body class="dash-body">
 
-<div class="top-controls">
-  <a href="../app.html" class="control-btn">🏠 App</a>
-  <button class="control-btn" data-theme-toggle>☾ Dark</button>
+<div class="dash-shell">
+
+  <!-- ═══════════════════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════════════════════ -->
+  <aside class="dash-sidebar">
+    <div class="ds-logo">
+      <div class="ds-logo-mark">✦ RanzAI</div>
+      <div class="ds-logo-sub" id="sbGreet">AI Prompt Studio</div>
+    </div>
+
+    <nav class="ds-nav">
+      <button class="ds-nav-item active" onclick="dsNav('tools', this)">
+        <span class="ds-ni">✦</span> Tools
+      </button>
+      <button class="ds-nav-item" onclick="dsNav('history', this)">
+        <span class="ds-ni">🕘</span> History
+      </button>
+      <button class="ds-nav-item" onclick="dsNav('billing', this)">
+        <span class="ds-ni">⚡</span> Billing
+      </button>
+      <button class="ds-nav-item" onclick="dsNav('settings', this)">
+        <span class="ds-ni">⚙️</span> Settings
+      </button>
+    </nav>
+
+    <!-- KREDIT — paling ditonjolkan -->
+    <div class="ds-credit">
+      <div class="ds-credit-label">⚡ Kredit Kamu</div>
+      <div class="ds-credit-row">
+        <div class="ds-credit-num" id="sbCreditNum">—</div>
+        <div class="ds-credit-unit">kredit</div>
+      </div>
+      <div class="ds-credit-sub" id="sbCreditSub">memuat...</div>
+      <a href="../topup.html" class="ds-btn-topup">+ Top Up Kredit</a>
+    </div>
+
+    <div class="ds-user">
+      <div class="ds-avatar">👤</div>
+      <div>
+        <div class="ds-user-name" id="sbUserName">—</div>
+        <div class="ds-user-plan" id="sbUserPlan">Free</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════
+       MAIN AREA
+  ════════════════════════════════════════════════ -->
+  <main class="dash-main">
+
+    <!-- ── TOOLS — persis isi app.html ── -->
+    <div class="ds-page active" id="ds-tools">
+      <div class="dash-tools-wrap">
+        <header class="app-header">
+          <div class="badge">✦ RanzAI</div>
+          <h1><span>Image →</span> <span>Prompt</span></h1>
+          <p class="subtitle">upload gambar · generate · copy · done</p>
+        </header>
+
+        <!-- banner kredit habis -->
+        <div id="bannerNoCredit" class="ds-banner-nocredit">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--danger);line-height:1.6;">
+            ⚡ <strong style="color:#ffaaaa;">Kredit habis!</strong> Top up untuk lanjut generate.
+            <span style="color:var(--muted);font-size:10px;display:block;margin-top:2px;">Rp 1.000 = 1 generate</span>
+          </div>
+          <a href="../topup.html" style="font-family:'Space Mono',monospace;font-size:11px;color:#0d0d0f;background:var(--accent);border-radius:8px;padding:8px 16px;text-decoration:none;font-weight:700;flex-shrink:0;">⚡ Top Up</a>
+        </div>
+
+        <!-- upload zone -->
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*">
+          <span class="upload-icon">⬆</span>
+          <div class="upload-label">Drop gambar di sini atau klik untuk pilih</div>
+          <div class="upload-hint">JPG, PNG, WEBP — maks 10MB</div>
+        </div>
+
+        <!-- preview -->
+        <div class="preview-wrap" id="previewWrap">
+          <img id="previewImg" src="" alt="preview">
+          <button class="preview-remove" id="removeBtn">✕ Ganti</button>
+        </div>
+
+        <!-- Output Format -->
+        <div class="option-group" data-group="format">
+          <div class="option-label">Output Format</div>
+          <div class="format-row">
+            <button class="fmt-btn active" data-format="json">JSON Structured</button>
+            <button class="fmt-btn" data-format="plain">Plain Text</button>
+          </div>
+        </div>
+
+        <!-- Target AI -->
+        <div class="option-group" data-group="target">
+          <div class="option-label">Target AI</div>
+          <div class="format-row">
+            <button class="fmt-btn active" data-target="chatgpt">ChatGPT</button>
+            <button class="fmt-btn" data-target="gemini">Gemini</button>
+            <button class="fmt-btn" data-target="midjourney">Midjourney</button>
+          </div>
+          <div class="format-row">
+            <button class="fmt-btn" data-target="flux">Flux</button>
+            <button class="fmt-btn" data-target="sdxl">SDXL</button>
+            <button class="fmt-btn" data-target="leonardo">Leonardo</button>
+          </div>
+          <div class="format-row">
+            <button class="fmt-btn" data-target="ideogram">Ideogram</button>
+            <button class="fmt-btn" data-target="recraft">Recraft</button>
+            <button class="fmt-btn" data-target="dalle">DALL·E</button>
+          </div>
+        </div>
+
+        <!-- Visual Style -->
+        <div class="option-group" data-group="style">
+          <div class="option-label">Visual Style</div>
+          <div class="format-row">
+            <button class="fmt-btn active" data-style="normal">Normal</button>
+            <button class="fmt-btn" data-style="cinematic">Cinematic</button>
+            <button class="fmt-btn" data-style="poster_ads">Poster Ads</button>
+          </div>
+          <div class="format-row">
+            <button class="fmt-btn" data-style="anime">Anime</button>
+            <button class="fmt-btn" data-style="realistic">Realistic</button>
+            <button class="fmt-btn" data-style="luxury">Luxury</button>
+          </div>
+          <div class="format-row">
+            <button class="fmt-btn" data-style="streetwear">Streetwear</button>
+            <button class="fmt-btn" data-style="techwear">Techwear</button>
+            <button class="fmt-btn" data-style="cyberpunk">Cyberpunk</button>
+          </div>
+        </div>
+
+        <button class="btn-generate" id="generateBtn" disabled>
+          <div class="spinner"></div>
+          <span class="btn-text">✦ Generate Prompt</span>
+        </button>
+
+        <div class="ds-credit-info-bar">⚡ 1 kredit per generate · sisa: <strong id="toolsCreditLeft">—</strong></div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="result-box" id="resultBox">
+          <div class="result-header">
+            <span class="result-title">Output Prompt</span>
+            <button class="btn-copy" id="copyBtn">Copy</button>
+          </div>
+          <div class="result-content" id="resultContent"></div>
+        </div>
+
+        <footer class="app-footer" style="margin-top:40px;">RanzAI · powered by OpenAI Vision · by Iky</footer>
+      </div>
+    </div>
+
+    <!-- ── HISTORY ── -->
+    <div class="ds-page" id="ds-history">
+      <div class="ds-hist-inner">
+        <div class="ds-page-title">History</div>
+        <div class="ds-page-sub">Prompt yang pernah kamu buat</div>
+        <div class="ds-hist-list" id="histList">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);opacity:.4;padding:40px 0;text-align:center;">
+            Belum ada history.<br>Generate dulu di menu Tools.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BILLING ── -->
+    <div class="ds-page" id="ds-billing">
+      <div class="ds-bill-inner">
+        <div class="ds-page-title">Billing & Top Up</div>
+        <div class="ds-page-sub">Kelola kredit kamu</div>
+
+        <div class="ds-bill-card">
+          <div class="ds-bill-row"><div class="ds-bill-key">Plan Aktif</div><div class="ds-bill-val" id="billPlan">Free</div></div>
+          <div class="ds-bill-row"><div class="ds-bill-key">🎁 Free Kredit</div><div class="ds-bill-val" id="billFree" style="color:#a090f0;">—</div></div>
+          <div class="ds-bill-row"><div class="ds-bill-key">💳 Paid Kredit</div><div class="ds-bill-val" id="billPaid" style="color:var(--accent);">—</div></div>
+          <div class="ds-bill-row total-row"><div class="ds-bill-key" style="font-weight:700;">Total Kredit</div><div class="ds-bill-val" id="billTotal">—</div></div>
+        </div>
+
+        <div class="ds-sec-label">Pilih Paket Top Up</div>
+        <div class="ds-topup-grid">
+          <div class="ds-tp-card">
+            <div class="ds-tp-amt">Rp 5K</div>
+            <div class="ds-tp-cr">5 kredit</div>
+          </div>
+          <div class="ds-tp-card popular">
+            <div class="ds-tp-amt">Rp 15K</div>
+            <div class="ds-tp-cr">15 kredit</div>
+            <div class="ds-tp-badge">POPULAR</div>
+          </div>
+          <div class="ds-tp-card">
+            <div class="ds-tp-amt">Rp 50K</div>
+            <div class="ds-tp-cr">50 kredit</div>
+          </div>
+        </div>
+
+        <a href="../topup.html" class="ds-btn-topup-full">⚡ Top Up Sekarang</a>
+        <div class="ds-bill-note">Rp 1.000 = 1 kredit · Pembayaran via QRIS & Transfer</div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="ds-page" id="ds-settings">
+      <div class="ds-set-inner">
+        <div class="ds-page-title">Settings</div>
+        <div class="ds-page-sub">Kelola profil dan akun kamu</div>
+
+        <div class="ds-sec-label" style="margin-bottom:10px;">Profil</div>
+        <div class="ds-set-group">
+          <div class="ds-set-row">
+            <div class="ds-set-key">Nama</div>
+            <input class="ds-set-input" id="setName" value="">
+          </div>
+          <div class="ds-set-row">
+            <div class="ds-set-key">Email</div>
+            <input class="ds-set-input" id="setEmail" value="" readonly style="opacity:.5;">
+          </div>
+          <div class="ds-set-row">
+            <div class="ds-set-key">Plan</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--accent);" id="setPlan">Free</div>
+          </div>
+          <div class="ds-set-row" style="justify-content:flex-end;">
+            <button class="ds-btn-save">Simpan Perubahan</button>
+          </div>
+        </div>
+
+        <div class="ds-sec-label" style="margin-bottom:10px;">Keamanan</div>
+        <div class="ds-set-group">
+          <div class="ds-set-row">
+            <div class="ds-set-key">Password Baru</div>
+            <input class="ds-set-input" type="password" placeholder="••••••••">
+          </div>
+          <div class="ds-set-row" style="justify-content:flex-end;">
+            <button class="ds-btn-save">Ganti Password</button>
+          </div>
+        </div>
+
+        <div class="ds-sec-label" style="margin-bottom:10px;">Akun</div>
+        <div class="ds-set-group">
+          <div class="ds-set-row">
+            <div class="ds-set-key">Keluar dari akun</div>
+            <button class="ds-btn-logout" onclick="dsLogout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
 </div>
 
-<div class="container" style="max-width:640px;">
-
-  <header class="app-header" style="margin-bottom:24px;">
-    <div class="badge">✦ RanzAI</div>
-    <h1>Dashboard</h1>
-    <p class="subtitle" id="greetMsg">Selamat datang!</p>
-  </header>
-
-  <!-- User Card -->
-  <div class="user-card">
-    <div class="user-avatar">👤</div>
-    <div class="user-info">
-      <div class="user-name" id="userName">—</div>
-      <div class="user-email" id="userEmail">—</div>
-      <span class="user-plan" id="userPlan">Free</span>
+<!-- Popup Top Up (sama seperti app.html) -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+  <div class="popup-box" onclick="event.stopPropagation()">
+    <div class="popup-icon">⚡</div>
+    <h2 class="popup-title">Credit Kamu Habis</h2>
+    <p class="popup-desc">
+      Kamu sudah pakai 1 generate gratis.<br>
+      Top up kredit untuk lanjut generate.
+    </p>
+    <div class="popup-price-info">
+      Rp 1.000 <span>=</span> 1 generate
     </div>
+    <a href="../topup.html" class="popup-btn-primary">⚡ Top Up Sekarang</a>
+    <button class="popup-btn-secondary" onclick="closePopup()">Nanti saja</button>
   </div>
-
-  <!-- Top Up Banner -->
-  <div class="topup-banner" id="topupBanner" style="display:none;">
-    <div>
-      <div class="topup-text">⚡ Kredit kamu habis!</div>
-      <div class="topup-sub">Rp 1.000 = 1 generate</div>
-    </div>
-    <a href="../topup.html" class="btn-dash primary" style="font-size:12px; padding:10px 16px;">Top Up →</a>
-  </div>
-
-  <!-- Stats -->
-  <div class="section-title">Kredit & Penggunaan</div>
-  <div class="dash-grid">
-    <div class="dash-card accent">
-      <div class="card-label">⚡ Kredit Tersisa</div>
-      <div class="card-value" id="creditTotal">—</div>
-      <div class="card-sub">Free + Paid credit</div>
-    </div>
-    <div class="dash-card">
-      <div class="card-label">🎁 Free Credit</div>
-      <div class="card-value" id="freeCredit" style="color:#a090f0;">—</div>
-      <div class="card-sub">1x gratis untuk coba</div>
-    </div>
-    <div class="dash-card">
-      <div class="card-label">💳 Paid Credit</div>
-      <div class="card-value" id="paidCredit" style="color:#f0f0f0;">—</div>
-      <div class="card-sub">Rp 1.000 per credit</div>
-    </div>
-  </div>
-
-  <!-- Actions -->
-  <div class="section-title">Menu</div>
-  <div class="dash-actions">
-    <a href="../app.html" class="btn-dash primary">✦ Generate Prompt</a>
-    <a href="../topup.html" class="btn-dash secondary">⚡ Top Up Credit</a>
-    <button class="btn-dash danger" onclick="logout()">Logout</button>
-  </div>
-
 </div>
 
-<script src="../assets/js/ui.js"></script>
+<!-- JS dari assets (path relatif dari dashboard/) -->
+<script src="../assets/js/ui.js" defer></script>
+<script src="../assets/js/targets.js" defer></script>
+<script src="../assets/js/styles.js" defer></script>
+<script src="../assets/js/engine.js" defer></script>
+
 <script>
-  const SUPABASE_URL = 'https://cavouyzyasnuygkuwizy.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r';
+/* ── Session Guard — redirect kalau belum login ── */
+(function() {
+  const raw = localStorage.getItem('ranzai_session');
+  if (!raw) { window.location.href = '../auth/login.html'; }
+})();
+const SUPABASE_URL = 'https://cavouyzyasnuygkuwizy.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r';
+const GENERATE_ENDPOINT = 'https://cavouyzyasnuygkuwizy.supabase.co/functions/v1/generate-prompt';
 
-  function getSession() {
-    const raw = localStorage.getItem('ranzai_session');
-    return raw ? JSON.parse(raw) : null;
-  }
+/* ── State ─────────────────────────────────── */
+let imageBase64 = null;
+let imageMime   = 'image/jpeg';
+let currentFormat      = 'json';
+let currentTargetAI    = 'chatgpt';
+let currentVisualStyle = 'normal';
+let rawResult = '';
 
-  function logout() {
-    localStorage.removeItem('ranzai_session');
+/* ── Session ───────────────────────────────── */
+function getSession() {
+  const raw = localStorage.getItem('ranzai_session');
+  return raw ? JSON.parse(raw) : null;
+}
+
+/* ── Navigation ────────────────────────────── */
+function dsNav(id, btn) {
+  document.querySelectorAll('.ds-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ds-nav-item').forEach(b => b.classList.remove('active'));
+  const pg = document.getElementById('ds-' + id);
+  if (pg) pg.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+/* ── Credits ───────────────────────────────── */
+async function loadCredits() {
+  const session = getSession();
+
+  const numEl  = document.getElementById('sbCreditNum');
+  const subEl  = document.getElementById('sbCreditSub');
+  const toolEl = document.getElementById('toolsCreditLeft');
+
+  if (!session?.user?.id) {
+    numEl.textContent  = '0';
+    subEl.textContent  = 'belum login';
+    toolEl.textContent = '0';
     window.location.href = '../auth/login.html';
+    return;
   }
 
-  function getGreeting() {
-    const h = new Date().getHours();
-    if (h < 12) return 'Selamat pagi';
-    if (h < 15) return 'Selamat siang';
-    if (h < 18) return 'Selamat sore';
-    return 'Selamat malam';
-  }
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/user_credits?user_id=eq.${session.user.id}&select=free_used,paid_credits,plan`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
+    );
+    const data = await res.json();
+    const row  = data[0] || { free_used: 0, paid_credits: 0, plan: 'free' };
 
-  async function loadDashboard() {
-    const session = getSession();
-    if (!session?.user?.id) {
-      window.location.href = '../auth/login.html';
-      return;
+    const freeLeft = row.free_used < 1 ? 1 : 0;
+    const paid     = row.paid_credits || 0;
+    const total    = freeLeft + paid;
+    const plan     = (row.plan || 'free').toUpperCase();
+
+    // sidebar
+    numEl.textContent = total;
+    subEl.textContent = `${freeLeft} free · ${paid} paid`;
+
+    // home stats — dihapus, tidak ada lagi
+    // document.getElementById('homeTotal') dst tidak ada
+
+    // billing
+    document.getElementById('billFree').textContent  = freeLeft;
+    document.getElementById('billPaid').textContent  = paid;
+    document.getElementById('billTotal').textContent = total;
+    document.getElementById('billPlan').textContent  = plan;
+
+    // tools bar
+    if (toolEl) toolEl.textContent = total;
+
+    // settings
+    document.getElementById('setPlan').textContent = plan;
+
+    // low credit warning
+    if (total === 0) {
+      document.getElementById('bannerNoCredit').style.display = 'flex';
+      numEl.style.color = 'var(--danger)';
     }
 
-    const user = session.user;
-    const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+  } catch(e) {
+    numEl.textContent = '?';
+  }
+}
 
-    document.getElementById('greetMsg').textContent = getGreeting() + ', ' + name + '!';
-    document.getElementById('userName').textContent = name;
-    document.getElementById('userEmail').textContent = user.email || '—';
+/* ── User info ─────────────────────────────── */
+function loadUserInfo() {
+  const session = getSession();
+  if (!session?.user) return;
+  const user = session.user;
+  const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
 
-    try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/user_credits?user_id=eq.${user.id}&select=free_used,paid_credits,plan`,
-        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
-      );
-      const data = await res.json();
-      const row = data[0] || { free_used: 0, paid_credits: 0, plan: 'free' };
+  document.getElementById('sbUserName').textContent = name;
+  document.getElementById('setName').value  = name;
+  document.getElementById('setEmail').value = user.email || '';
+  document.getElementById('sbUserPlan').textContent = (user.user_metadata?.plan || 'Free').toUpperCase();
 
-      const freeLeft   = row.free_used < 1 ? 1 : 0;
-      const paid       = row.paid_credits || 0;
-      const total      = freeLeft + paid;
-      const plan       = row.plan || 'free';
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Pagi' : h < 15 ? 'Siang' : h < 18 ? 'Sore' : 'Malam';
+  document.getElementById('sbGreet').textContent = greet + ', ' + name + '!';
+}
 
-      document.getElementById('freeCredit').textContent  = freeLeft;
-      document.getElementById('paidCredit').textContent  = paid;
-      document.getElementById('creditTotal').textContent = total;
-      document.getElementById('userPlan').textContent    = plan.toUpperCase();
+/* ── Logout ────────────────────────────────── */
+function dsLogout() {
+  localStorage.removeItem('ranzai_session');
+  window.location.href = '../auth/login.html';
+}
 
-      if (total === 0) {
-        document.getElementById('topupBanner').style.display = 'flex';
+/* ── Tools: upload ─────────────────────────── */
+const fileInput   = document.getElementById('fileInput');
+const uploadZone  = document.getElementById('uploadZone');
+const previewWrap = document.getElementById('previewWrap');
+const previewImg  = document.getElementById('previewImg');
+const generateBtn = document.getElementById('generateBtn');
+const resultBox   = document.getElementById('resultBox');
+const resultContent = document.getElementById('resultContent');
+const errorMsg    = document.getElementById('errorMsg');
+const removeBtn   = document.getElementById('removeBtn');
+const copyBtn     = document.getElementById('copyBtn');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) loadImage(f);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadImage(fileInput.files[0]); });
+removeBtn.addEventListener('click', () => {
+  imageBase64 = null;
+  previewWrap.style.display = 'none';
+  uploadZone.style.display  = 'block';
+  generateBtn.disabled = true;
+  resultBox.style.display  = 'none';
+  errorMsg.style.display   = 'none';
+  fileInput.value = '';
+});
+
+generateBtn.addEventListener('click', generatePrompt);
+copyBtn.addEventListener('click', copyResult);
+
+/* option buttons */
+document.querySelectorAll('[data-format]').forEach(btn => {
+  btn.addEventListener('click', () => { currentFormat = btn.dataset.format; setActive(btn); });
+});
+document.querySelectorAll('[data-target]').forEach(btn => {
+  btn.addEventListener('click', () => { currentTargetAI = btn.dataset.target; setActive(btn); });
+});
+document.querySelectorAll('[data-style]').forEach(btn => {
+  btn.addEventListener('click', () => { currentVisualStyle = btn.dataset.style; setActive(btn); });
+});
+function setActive(btn) {
+  const grp = btn.closest('.option-group');
+  grp.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function loadImage(file) {
+  if (!file.type.startsWith('image/')) return showError('File harus berupa gambar.');
+  if (file.size > 10 * 1024 * 1024) return showError('Ukuran file maks 10MB.');
+  imageMime = file.type;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imageBase64 = e.target.result.split(',')[1];
+    previewImg.src = e.target.result;
+    previewWrap.style.display = 'block';
+    uploadZone.style.display  = 'none';
+    generateBtn.disabled = false;
+    errorMsg.style.display   = 'none';
+    resultBox.style.display  = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── Generate ──────────────────────────────── */
+async function generatePrompt() {
+  if (!imageBase64) return;
+
+  const session = getSession();
+  if (!session?.user?.id) {
+    window.location.href = '../auth/login.html';
+    return;
+  }
+
+  // cek kredit
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/user_credits?user_id=eq.${session.user.id}&select=free_used,paid_credits`,
+    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
+  );
+  const data = await res.json();
+  const row = data[0] || { free_used: 0, paid_credits: 0 };
+  const canUseFree = row.free_used < 1;
+  const hasPaid    = row.paid_credits > 0;
+  if (!canUseFree && !hasPaid) return showTopUpPopup();
+
+  generateBtn.disabled = true;
+  generateBtn.classList.add('loading');
+  generateBtn.querySelector('.btn-text').textContent = 'Menganalisis...';
+  resultBox.style.display  = 'none';
+  errorMsg.style.display   = 'none';
+
+  try {
+    const prompt = window.RanzAIEngine.buildPrompt({
+      format: currentFormat,
+      targetAI: currentTargetAI,
+      visualStyle: currentVisualStyle
+    });
+
+    const r = await fetch(GENERATE_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify({ imageBase64, mimeType: imageMime, prompt })
+    });
+    const result = await r.json();
+    if (!r.ok) throw new Error(result.error || 'Generate gagal.');
+
+    rawResult = result.result || '';
+
+    // kurangi kredit
+    const creditBody = canUseFree
+      ? { free_used: row.free_used + 1 }
+      : { paid_credits: row.paid_credits - 1 };
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/user_credits?user_id=eq.${session.user.id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(creditBody)
       }
-    } catch(e) {
-      document.getElementById('creditTotal').textContent = '?';
-    }
-  }
+    );
 
-  window.addEventListener('DOMContentLoaded', loadDashboard);
+    // simpan ke history localStorage
+    saveHistory(rawResult);
+
+    displayResult(rawResult);
+    loadCredits(); // refresh angka
+
+  } catch(err) {
+    showError('Error: ' + err.message);
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.classList.remove('loading');
+    generateBtn.querySelector('.btn-text').textContent = '✦ Generate Prompt';
+  }
+}
+
+function displayResult(text) {
+  resultContent.innerHTML = syntaxHighlight(text);
+  resultBox.style.display = 'block';
+  resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function syntaxHighlight(text) {
+  try {
+    const parsed = JSON.parse(text.trim());
+    const json = JSON.stringify(parsed, null, 2);
+    return json
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"([^"]+)":/g,'<span class="key">"$1"</span>:')
+      .replace(/: "([^"]*)"(,?)/g,': <span class="string">"$1"</span>$2')
+      .replace(/: (\d+)(,?)/g,': <span class="number">$1</span>$2');
+  } catch {
+    return text
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/---/g,'<hr style="border-color:var(--border);margin:16px 0">');
+  }
+}
+
+function copyResult() {
+  navigator.clipboard.writeText(rawResult).then(() => {
+    copyBtn.textContent = '✓ Tersalin!';
+    copyBtn.classList.add('copied');
+    setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function showError(msg) {
+  errorMsg.textContent  = msg;
+  errorMsg.style.display = 'block';
+}
+
+function showTopUpPopup() {
+  document.getElementById('popupOverlay').classList.add('show');
+}
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('show');
+}
+
+/* ── History ───────────────────────────────── */
+function saveHistory(prompt) {
+  const hist = JSON.parse(localStorage.getItem('ranzai_history') || '[]');
+  hist.unshift({
+    text: prompt,
+    target: currentTargetAI,
+    style: currentVisualStyle,
+    ts: Date.now()
+  });
+  localStorage.setItem('ranzai_history', JSON.stringify(hist.slice(0, 30)));
+  renderHistory();
+}
+
+function renderHistory() {
+  const hist = JSON.parse(localStorage.getItem('ranzai_history') || '[]');
+  const list = document.getElementById('histList');
+  if (!hist.length) {
+    list.innerHTML = '<div style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--muted);opacity:.4;padding:40px 0;text-align:center;">Belum ada history.<br>Generate dulu di menu Tools.</div>';
+    return;
+  }
+  list.innerHTML = hist.map((h, i) => {
+    const preview = h.text.slice(0, 120).replace(/</g,'&lt;');
+    const ago = timeAgo(h.ts);
+    return `
+      <div class="ds-hist-item" onclick="copyHist(${i})">
+        <div class="ds-hist-ico">📸</div>
+        <div class="ds-hist-body">
+          <div class="ds-hist-txt">${preview}...</div>
+          <div class="ds-hist-meta">${h.target} · ${h.style} · ${ago}</div>
+        </div>
+        <div class="ds-hist-copy" id="hcopy-${i}">copy</div>
+      </div>`;
+  }).join('');
+}
+
+function copyHist(i) {
+  const hist = JSON.parse(localStorage.getItem('ranzai_history') || '[]');
+  if (!hist[i]) return;
+  navigator.clipboard.writeText(hist[i].text).catch(() => {});
+  const el = document.getElementById('hcopy-' + i);
+  if (el) { el.textContent = 'copied!'; setTimeout(() => el.textContent = 'copy', 1500); }
+}
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 60000);
+  if (diff < 1)   return 'baru saja';
+  if (diff < 60)  return diff + ' menit lalu';
+  if (diff < 1440) return Math.floor(diff/60) + ' jam lalu';
+  return Math.floor(diff/1440) + ' hari lalu';
+}
+
+/* ── Init ──────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  loadUserInfo();
+  loadCredits();
+  renderHistory();
+});
 </script>
+
 </body>
 </html>
