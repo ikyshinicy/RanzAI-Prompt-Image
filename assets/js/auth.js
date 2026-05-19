@@ -33,18 +33,40 @@ function loginWithGoogle() {
 }
 
 function saveSession(data) {
-  if (data.session) {
-    localStorage.setItem('ranzai_session', JSON.stringify({
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      user: data.user
-    }));
+  // support both {session, user} and flat token response
+  const session = data.session || data;
+  const user    = data.user || session.user;
+
+  if (!session?.access_token) return false;
+
+  const payload = {
+    access_token:  session.access_token,
+    refresh_token: session.refresh_token || '',
+    user:          user
+  };
+
+  try {
+    localStorage.setItem('ranzai_session', JSON.stringify(payload));
+    // verify it was actually written
+    const check = localStorage.getItem('ranzai_session');
+    return !!check;
+  } catch(e) {
+    return false;
   }
 }
 
-function goToApp() {
-  window.location.href = '../dashboard/index.html';
+function goToDashboard() {
+  // absolute path supaya tidak salah dari mana pun
+  const base = window.location.origin;
+  // cari root project — kalau ada /auth/ di path, naik 1 level
+  const path = window.location.pathname.includes('/auth/')
+    ? window.location.pathname.replace(/\/auth\/.*$/, '')
+    : '';
+  window.location.replace(base + path + '/dashboard/index.html');
 }
+
+// alias lama tetap jalan
+function goToApp() { goToDashboard(); }
 
 function initTheme() {
   const saved = localStorage.getItem('ranzai_theme') || 'dark';
