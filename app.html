@@ -1,303 +1,333 @@
-// RanzAI App Logic
-let imageBase64 = null;
-let imageMime = 'image/jpeg';
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RanzAI — Image Prompt Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="app-page">
 
-let currentFormat = 'json';
-let currentTargetAI = 'chatgpt';
-let currentVisualStyle = 'normal';
+<div class="top-controls">
+  <a href="index.html" class="control-btn" title="Home">🏠 Home</a>
+  <button class="control-btn" data-lang-btn="id">ID</button>
+  <button class="control-btn" data-lang-btn="en">EN</button>
+  <button class="control-btn" data-theme-toggle>☾ Dark</button>
+  <!-- Auth buttons: tampil kalau belum login -->
+  <div id="authButtons" style="display:none;">
+    <a href="auth/login.html" class="control-btn">Login</a>
+    <a href="auth/register.html" class="control-btn" style="background:var(--accent);color:#0d0d0f;border-color:var(--accent);font-weight:700;">Daftar</a>
+  </div>
+  <!-- Credit bar: tampil kalau sudah login -->
+  <a href="topup.html" class="credit-bar" id="creditBar" style="display:none;">
+    <span class="credit-icon">⚡</span>
+    <span class="credit-count" id="creditCount">—</span>
+    <span class="credit-label">credits</span>
+  </a>
+</div>
 
-let rawResult = '';
+<div class="container">
+  <header class="app-header">
+    <div class="badge">✦ RanzAI</div>
+    <h1><span data-i18n="app_title">Image →</span> <span data-i18n="app_title_accent">Prompt</span></h1>
+    <p class="subtitle" data-i18n="app_subtitle">upload gambar · generate · copy · done</p>
+  </header>
 
-const SUPABASE_URL = 'https://cavouyzyasnuygkuwizy.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r';
-const GENERATE_ENDPOINT = 'https://cavouyzyasnuygkuwizy.supabase.co/functions/v1/generate-prompt';
+  <!-- Banner: belum login -->
+  <div id="bannerNotLogin" style="display:none; margin-bottom:20px; background:rgba(124,92,252,.08); border:1px solid rgba(124,92,252,.3); border-radius:12px; padding:14px 18px; display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; color:#a090f0; line-height:1.6;">
+      🔒 <strong style="color:#c4b8ff;">Login dulu</strong> untuk bisa generate prompt.
+    </div>
+    <div style="display:flex; gap:8px; flex-shrink:0;">
+      <a href="auth/login.html" style="font-family:'Space Mono',monospace; font-size:11px; color:#a090f0; border:1px solid rgba(124,92,252,.4); border-radius:8px; padding:7px 14px; text-decoration:none; transition:all .2s;">Login</a>
+      <a href="auth/register.html" style="font-family:'Space Mono',monospace; font-size:11px; color:#0d0d0f; background:var(--accent); border:1px solid var(--accent); border-radius:8px; padding:7px 14px; text-decoration:none; font-weight:700; transition:all .2s;">Daftar Gratis</a>
+    </div>
+  </div>
 
-// ── Baca token dari URL hash setelah login Google ─────────────────────
-(async function readHashToken() {
-  const hash = window.location.hash;
-  if (!hash.includes('access_token')) return;
-  const params = new URLSearchParams(hash.substring(1));
-  const access_token  = params.get('access_token');
-  const refresh_token = params.get('refresh_token');
-  if (!access_token) return;
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: {
-        'apikey': SUPABASE_PUBLISHABLE_KEY,
-        'Authorization': `Bearer ${access_token}`
-      }
-    });
-    const user = await res.json();
-    if (user?.id) {
-      localStorage.setItem('ranzai_session', JSON.stringify({ access_token, refresh_token, user }));
-    }
-  } catch(e) {}
-  window.history.replaceState({}, '', window.location.pathname);
-})();
+  <!-- Banner: kredit habis -->
+  <div id="bannerNoCredit" style="display:none; margin-bottom:20px; background:rgba(255,77,77,.06); border:1px solid rgba(255,77,77,.25); border-radius:12px; padding:14px 18px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; color:#ff8080; line-height:1.6;">
+      ⚡ <strong style="color:#ffaaaa;">Kredit habis!</strong> Top up untuk lanjut generate.
+      <span style="color:#6b6b7a; font-size:10px; display:block; margin-top:2px;">Rp 1.000 = 1 generate</span>
+    </div>
+    <a href="topup.html" style="font-family:'Space Mono',monospace; font-size:11px; color:#0d0d0f; background:var(--accent); border-radius:8px; padding:8px 16px; text-decoration:none; font-weight:700; flex-shrink:0;">⚡ Top Up</a>
+  </div>
 
-  const raw = localStorage.getItem('ranzai_session');
-  return raw ? JSON.parse(raw) : null;
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept="image/*">
+    <span class="upload-icon">⬆</span>
+    <div class="upload-label" data-i18n="upload_text">Drop gambar di sini atau klik untuk pilih</div>
+    <div class="upload-hint" data-i18n="upload_hint">JPG, PNG, WEBP — maks 10MB</div>
+  </div>
+
+  <div class="preview-wrap" id="previewWrap">
+    <img id="previewImg" src="" alt="preview">
+    <button class="preview-remove" id="removeBtn" data-i18n="replace">✕ Ganti</button>
+  </div>
+
+  <div class="option-group" data-group="format">
+    <div class="option-label" data-i18n="output_format">Output Format</div>
+    <div class="format-row">
+      <button class="fmt-btn active" data-format="json">JSON Structured</button>
+      <button class="fmt-btn" data-format="plain">Plain Text</button>
+    </div>
+  </div>
+
+  <div class="option-group" data-group="target">
+    <div class="option-label" data-i18n="target_ai">Target AI</div>
+    <div class="format-row">
+      <button class="fmt-btn active" data-target="chatgpt">ChatGPT</button>
+      <button class="fmt-btn" data-target="gemini">Gemini</button>
+      <button class="fmt-btn" data-target="midjourney">Midjourney</button>
+    </div>
+    <div class="format-row">
+      <button class="fmt-btn" data-target="flux">Flux</button>
+      <button class="fmt-btn" data-target="sdxl">SDXL</button>
+      <button class="fmt-btn" data-target="leonardo">Leonardo</button>
+    </div>
+    <div class="format-row">
+      <button class="fmt-btn" data-target="ideogram">Ideogram</button>
+      <button class="fmt-btn" data-target="recraft">Recraft</button>
+      <button class="fmt-btn" data-target="dalle">DALL·E</button>
+    </div>
+  </div>
+
+  <div class="option-group" data-group="style">
+    <div class="option-label" data-i18n="visual_style">Visual Style</div>
+    <div class="format-row">
+      <button class="fmt-btn active" data-style="normal">Normal</button>
+      <button class="fmt-btn" data-style="cinematic">Cinematic</button>
+      <button class="fmt-btn" data-style="poster_ads">Poster Ads</button>
+    </div>
+    <div class="format-row">
+      <button class="fmt-btn" data-style="anime">Anime</button>
+      <button class="fmt-btn" data-style="realistic">Realistic</button>
+      <button class="fmt-btn" data-style="luxury">Luxury</button>
+    </div>
+    <div class="format-row">
+      <button class="fmt-btn" data-style="streetwear">Streetwear</button>
+      <button class="fmt-btn" data-style="techwear">Techwear</button>
+      <button class="fmt-btn" data-style="cyberpunk">Cyberpunk</button>
+    </div>
+  </div>
+
+  <button class="btn-generate" id="generateBtn" disabled>
+    <div class="spinner"></div>
+    <span class="btn-text" data-i18n="generate">✦ Generate Prompt</span>
+  </button>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-header">
+      <span class="result-title" data-i18n="output_prompt">OUTPUT PROMPT</span>
+      <button class="btn-copy" id="copyBtn" data-i18n="copy">Copy</button>
+    </div>
+    <div class="result-content" id="resultContent"></div>
+  </div>
+
+  <footer class="app-footer" data-i18n="app_footer">RanzAI · powered by OpenAI Vision · by Iky</footer>
+</div>
+
+<script src="assets/js/ui.js" defer></script>
+<script src="assets/js/targets.js" defer></script>
+<script src="assets/js/styles.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+
+<style>
+.credit-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(232,255,71,.08);
+  border: 1px solid rgba(232,255,71,.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #e8ff47;
+  text-decoration: none;
+  transition: all .2s;
+  cursor: pointer;
+}
+.credit-bar:hover { background: rgba(232,255,71,.15); }
+.credit-bar.low { border-color: rgba(255,77,77,.4); color: #ff8080; background: rgba(255,77,77,.08); }
+.credit-icon { font-size: 13px; }
+
+#authButtons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
-// ── Get user credits ─────────────────────────────────────────────────
-async function getUserCredits() {
-  const session = getSession();
-  if (!session?.user?.id) return { free_used: 0, paid_credits: 0 };
-
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/user_credits?user_id=eq.${session.user.id}&select=free_used,paid_credits`,
-    {
-      headers: {
-        apikey: SUPABASE_PUBLISHABLE_KEY,
-        Authorization: `Bearer ${session.access_token}`
-      }
-    }
-  );
-
-  const data = await res.json();
-  if (!data.length) return { free_used: 0, paid_credits: 0 };
-  return {
-    free_used:    data[0].free_used    || 0,
-    paid_credits: data[0].paid_credits || 0
-  };
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
 }
-
-// ── Decrease credits setelah generate ────────────────────────────────
-async function decreaseCredits(useFree) {
-  const session = getSession();
-  if (!session?.user?.id) return;
-
-  const credits = await getUserCredits();
-
-  const body = useFree
-    ? { free_used: credits.free_used + 1 }
-    : { paid_credits: credits.paid_credits - 1 };
-
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/user_credits?user_id=eq.${session.user.id}`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: SUPABASE_PUBLISHABLE_KEY,
-        Authorization: `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify(body)
-    }
-  );
+.popup-overlay.show { opacity: 1; pointer-events: all; }
+.popup-box {
+  background: #141417;
+  border: 1px solid #2a2a30;
+  border-radius: 16px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  position: relative;
+  transform: translateY(16px);
+  transition: transform .25s ease;
 }
-
-// ── DOM Elements ─────────────────────────────────────────────────────
-const fileInput     = document.getElementById('fileInput');
-const uploadZone    = document.getElementById('uploadZone');
-const previewWrap   = document.getElementById('previewWrap');
-const previewImg    = document.getElementById('previewImg');
-const generateBtn   = document.getElementById('generateBtn');
-const resultBox     = document.getElementById('resultBox');
-const resultContent = document.getElementById('resultContent');
-const errorMsg      = document.getElementById('errorMsg');
-const removeBtn     = document.getElementById('removeBtn');
-const copyBtn       = document.getElementById('copyBtn');
-
-// ── Upload events ─────────────────────────────────────────────────────
-uploadZone.addEventListener('click', () => fileInput.click());
-
-uploadZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  uploadZone.classList.add('drag-over');
-});
-
-uploadZone.addEventListener('dragleave', () => {
-  uploadZone.classList.remove('drag-over');
-});
-
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) loadImage(file);
-});
-
-fileInput.addEventListener('change', () => {
-  if (fileInput.files[0]) loadImage(fileInput.files[0]);
-});
-
-removeBtn.addEventListener('click', () => {
-  imageBase64 = null;
-  previewWrap.style.display = 'none';
-  uploadZone.style.display = 'block';
-  generateBtn.disabled = true;
-  resultBox.style.display = 'none';
-  errorMsg.style.display = 'none';
-  fileInput.value = '';
-});
-
-generateBtn.addEventListener('click', generatePrompt);
-copyBtn.addEventListener('click', copyResult);
-
-// ── Toggle buttons ────────────────────────────────────────────────────
-document.querySelectorAll('[data-format]').forEach(button => {
-  button.addEventListener('click', () => {
-    currentFormat = button.dataset.format;
-    setActiveButton(button);
-  });
-});
-
-document.querySelectorAll('[data-target]').forEach(button => {
-  button.addEventListener('click', () => {
-    currentTargetAI = button.dataset.target;
-    setActiveButton(button);
-  });
-});
-
-document.querySelectorAll('[data-style]').forEach(button => {
-  button.addEventListener('click', () => {
-    currentVisualStyle = button.dataset.style;
-    setActiveButton(button);
-  });
-});
-
-function setActiveButton(button) {
-  const group = button.closest('.option-group');
-  group.querySelectorAll('.fmt-btn').forEach(btn => btn.classList.remove('active'));
-  button.classList.add('active');
+.popup-overlay.show .popup-box { transform: translateY(0); }
+.popup-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 24px; right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e8ff47, transparent);
 }
-
-// ── Load image ────────────────────────────────────────────────────────
-function loadImage(file) {
-  if (!file.type.startsWith('image/')) return showError('File harus berupa gambar.');
-  if (file.size > 10 * 1024 * 1024) return showError('Ukuran file maks 10MB.');
-
-  imageMime = file.type;
-  const reader = new FileReader();
-
-  reader.onload = e => {
-    imageBase64 = e.target.result.split(',')[1];
-    previewImg.src = e.target.result;
-    previewWrap.style.display = 'block';
-    uploadZone.style.display = 'none';
-    generateBtn.disabled = false;
-    errorMsg.style.display = 'none';
-    resultBox.style.display = 'none';
-  };
-
-  reader.readAsDataURL(file);
+.popup-icon { font-size: 36px; margin-bottom: 16px; }
+.popup-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #f0f0f0; margin-bottom: 10px; }
+.popup-desc { font-family: 'Space Mono', monospace; font-size: 12px; color: #6b6b7a; line-height: 1.8; margin-bottom: 20px; }
+.popup-price-info {
+  background: rgba(232,255,71,.06);
+  border: 1px solid rgba(232,255,71,.2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: #e8ff47;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
 }
-
-function buildPrompt() {
-  return window.RanzAIEngine.buildPrompt({
-    format: currentFormat,
-    targetAI: currentTargetAI,
-    visualStyle: currentVisualStyle
-  });
+.popup-price-info span { color: #6b6b7a; margin: 0 6px; }
+.popup-btn-primary {
+  display: block;
+  width: 100%;
+  background: #e8ff47;
+  color: #0d0d0f;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s;
+  margin-bottom: 10px;
 }
-
-// ── Generate ──────────────────────────────────────────────────────────
-async function generatePrompt() {
-  if (!imageBase64) return;
-
-  // Cek session
-  const session = getSession();
-  if (!session?.user?.id) {
-    return showError('Kamu belum login. Silakan login dulu.');
-  }
-
-  // Cek credits
-  const credits = await getUserCredits();
-  const canUseFree = credits.free_used < 1;
-  const hasPaid    = credits.paid_credits > 0;
-
-  if (!canUseFree && !hasPaid) {
-    return showTopUpPopup();
-  }
-
-  generateBtn.disabled = true;
-  generateBtn.classList.add('loading');
-  generateBtn.querySelector('.btn-text').textContent =
-    document.documentElement.lang === 'en' ? 'Analyzing...' : 'Menganalisis...';
-  resultBox.style.display = 'none';
-  errorMsg.style.display = 'none';
-
-  try {
-    const response = await fetch(GENERATE_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_PUBLISHABLE_KEY,
-        'Authorization': 'Bearer ' + session.access_token
-      },
-      body: JSON.stringify({
-        imageBase64,
-        mimeType: imageMime,
-        prompt: buildPrompt()
-      })
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Generate gagal.');
-
-    rawResult = data.result || '';
-
-    // Kurangi kredit — free dulu, kalau sudah habis pakai paid
-    await decreaseCredits(canUseFree);
-
-    displayResult(rawResult);
-
-  } catch (err) {
-    showError('Error: ' + err.message);
-  } finally {
-    generateBtn.disabled = false;
-    generateBtn.classList.remove('loading');
-    generateBtn.querySelector('.btn-text').textContent = '✦ Generate Prompt';
-  }
+.popup-btn-primary:hover { background: #d4eb3a; }
+.popup-btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #2a2a30;
+  border-radius: 10px;
+  padding: 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #6b6b7a;
+  cursor: pointer;
+  transition: all .2s;
 }
+.popup-btn-secondary:hover { border-color: #6b6b7a; color: #f0f0f0; }
+</style>
 
-// ── Display & highlight ───────────────────────────────────────────────
-function displayResult(text) {
-  resultContent.innerHTML = syntaxHighlight(text);
-  resultBox.style.display = 'block';
-  resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+<!-- Popup Top Up -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+  <div class="popup-box" onclick="event.stopPropagation()">
+    <div class="popup-icon">⚡</div>
+    <h2 class="popup-title">Credit Kamu Habis</h2>
+    <p class="popup-desc">
+      Kamu sudah pakai 1 generate gratis.<br>
+      Top up kredit untuk lanjut generate.
+    </p>
+    <div class="popup-price-info">
+      Rp 1.000 <span>=</span> 1 generate
+    </div>
+    <a href="topup.html" class="popup-btn-primary">⚡ Top Up Sekarang</a>
+    <button class="popup-btn-secondary" onclick="closePopup()">Nanti saja</button>
+  </div>
+</div>
 
-function syntaxHighlight(text) {
-  try {
-    const parsed = JSON.parse(text.trim());
-    const json = JSON.stringify(parsed, null, 2);
-    return json
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
-      .replace(/: "([^"]*)"(,?)/g, ': <span class="string">"$1"</span>$2')
-      .replace(/: (\d+)(,?)/g, ': <span class="number">$1</span>$2');
-  } catch {
-    return text
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/---/g, '<hr style="border-color:#2a2a30;margin:16px 0">');
-  }
-}
-
-// ── Copy ──────────────────────────────────────────────────────────────
-function copyResult() {
-  navigator.clipboard.writeText(rawResult).then(() => {
-    copyBtn.textContent = document.documentElement.lang === 'en' ? '✓ Copied!' : '✓ Tersalin!';
-    copyBtn.classList.add('copied');
-    setTimeout(() => {
-      copyBtn.textContent = 'Copy';
-      copyBtn.classList.remove('copied');
-    }, 2000);
-  });
-}
-
-// ── Error ─────────────────────────────────────────────────────────────
-function showError(msg) {
-  errorMsg.textContent = msg;
-  errorMsg.style.display = 'block';
-}
-
-// ── Popup Top Up ──────────────────────────────────────────────────────
+<script>
 function showTopUpPopup() {
-  document.getElementById("popupOverlay").classList.add("show");
+  document.getElementById('popupOverlay').classList.add('show');
+}
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('show');
 }
 
-function closePopup() {
-  document.getElementById("popupOverlay").classList.remove("show");
+async function loadCreditBar() {
+  const raw = localStorage.getItem('ranzai_session');
+  const authButtons  = document.getElementById('authButtons');
+  const creditBar    = document.getElementById('creditBar');
+  const bannerNoLogin  = document.getElementById('bannerNotLogin');
+  const bannerNoCredit = document.getElementById('bannerNoCredit');
+
+  // Belum login
+  if (!raw) {
+    authButtons.style.display  = 'flex';
+    creditBar.style.display    = 'none';
+    bannerNoLogin.style.display  = 'flex';
+    bannerNoCredit.style.display = 'none';
+    return;
+  }
+
+  const session = JSON.parse(raw);
+  if (!session?.user?.id) {
+    authButtons.style.display  = 'flex';
+    creditBar.style.display    = 'none';
+    bannerNoLogin.style.display  = 'flex';
+    bannerNoCredit.style.display = 'none';
+    return;
+  }
+
+  // Sudah login — tampilkan credit bar, sembunyikan auth buttons
+  authButtons.style.display  = 'none';
+  creditBar.style.display    = 'inline-flex';
+  bannerNoLogin.style.display  = 'none';
+
+  try {
+    const res = await fetch(
+      `https://cavouyzyasnuygkuwizy.supabase.co/rest/v1/user_credits?user_id=eq.${session.user.id}&select=free_used,paid_credits`,
+      { headers: {
+        apikey: 'sb_publishable_6eixKKot9VleMm2KVD4o7w_C58lRv6r',
+        Authorization: `Bearer ${session.access_token}`
+      }}
+    );
+    const data = await res.json();
+    const freeLeft = (data[0]?.free_used || 0) < 1 ? 1 : 0;
+    const paid     = data[0]?.paid_credits || 0;
+    const total    = freeLeft + paid;
+
+    const el  = document.getElementById('creditCount');
+    const bar = document.getElementById('creditBar');
+    if (el) el.textContent = total;
+
+    if (total === 0) {
+      bar.classList.add('low');
+      bannerNoCredit.style.display = 'flex';
+    } else {
+      bar.classList.remove('low');
+      bannerNoCredit.style.display = 'none';
+    }
+  } catch {}
 }
+
+window.addEventListener('DOMContentLoaded', loadCreditBar);
+</script>
+
+</body>
+</html>
